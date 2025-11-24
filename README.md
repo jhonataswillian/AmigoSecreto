@@ -1,73 +1,128 @@
-# React + TypeScript + Vite
+# 🎁 Amigo Secreto
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+![Project Status](https://img.shields.io/badge/status-active-success.svg)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
 
-Currently, two official plugins are available:
+> A modern, premium, and magical experience for managing your Secret Santa events.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+**Amigo Secreto** is a feature-rich web application designed to simplify the organization of Secret Santa gift exchanges. Built with a focus on user experience, it features a beautiful, responsive Christmas-themed interface, secure group management, and interactive tools like wishlists and gift suggestions.
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## ✨ Features
 
-## Expanding the ESLint configuration
+### 🎄 Group Management
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Create & Manage**: Easily create groups with optional descriptions, event dates, and price limits.
+- **Secure Deletion**: Owners can safely delete groups with a confirmation safeguard.
+- **Smart Filtering**: View "All", "My Groups", or "Participating" groups in a unified list.
+- **Invites**: Invite friends via email or their unique `@handle`.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### 🎁 Wishlist & Gifting
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- **Personal Wishlist**: Add, edit, and remove items from your wishlist to help your Secret Santa.
+- **Gift Ideas**: Not sure what to ask for? Use our interactive questionnaire to get tailored suggestions.
+- **Secret Viewing**: View your match's wishlist and get them the perfect gift.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### 👤 Profile & Avatars
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- **Diverse Avatars**: Choose from a wide range of inclusive avatars (people, cute animals, objects, and Christmas themes).
+- **Customization**: Personalize your profile with unique frames and details.
+- **User Handles**: Unique `@handles` for easy identification and inviting.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### 🎲 The Draw
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- **Fair Algorithms**: Automated and random matching logic ensures a fair draw.
+- **Reveal Experience**: A suspenseful and fun reveal animation to discover your Secret Santa match.
+
+### 🎨 UI/UX
+
+- **Premium Design**: A polished, "glassmorphism" inspired Christmas theme.
+- **Responsive**: Fully optimized for mobile, tablet, and desktop.
+- **Animations**: Smooth transitions and delightful micro-interactions using Framer Motion.
+- **Notifications**: Real-time updates for invites and group activities.
+
+---
+
+## 🛠️ Tech Stack
+
+This project is built with a modern, robust, and type-safe stack:
+
+- **Core**: [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
+- **Build Tool**: [Vite](https://vitejs.dev/)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) + [clsx](https://github.com/lukeed/clsx) / [tailwind-merge](https://github.com/dcastil/tailwind-merge)
+- **State Management**: [Zustand](https://github.com/pmndrs/zustand)
+- **Routing**: [React Router v7](https://reactrouter.com/)
+- **Forms & Validation**: [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/)
+- **Animations**: [Framer Motion](https://www.framer.com/motion/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **Date Handling**: [date-fns](https://date-fns.org/)
+
+---
+
+## 🚀 Getting Started
+
+Follow these steps to run the project locally:
+
+### Prerequisites
+
+- Node.js (v18 or higher)
+- npm or yarn
+
+### Installation
+
+1.  **Clone the repository**
+
+    ```bash
+    git clone https://github.com/your-username/amigo-secreto.git
+    cd amigo-secreto
+    ```
+
+2.  **Install dependencies**
+
+    ```bash
+    npm install
+    ```
+
+3.  **Run the development server**
+
+    ```bash
+    npm run dev
+    ```
+
+4.  **Open your browser**
+    Navigate to `http://localhost:5173` to see the app in action.
+
+---
+
+## 📜 Scripts
+
+- `npm run dev`: Starts the development server.
+- `npm run build`: Builds the application for production.
+- `npm run lint`: Runs ESLint to check for code quality issues.
+- `npm run preview`: Previews the production build locally.
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1.  Fork the project
+2.  Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4.  Push to the branch (`git push origin feature/AmazingFeature`)
+5.  Open a Pull Request
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+<p align="center">
+  Made with ❤️ and 🎄 for the holidays.
+</p>
