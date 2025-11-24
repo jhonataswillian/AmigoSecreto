@@ -1,17 +1,17 @@
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, Gift } from 'lucide-react';
-import { useAuthStore } from '../store/useAuthStore';
-import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
-import { Card } from '../components/ui/Card';
+import React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Link, useNavigate } from "react-router-dom";
+import { Mail, Lock, Gift } from "lucide-react";
+import { useAuthStore } from "../store/useAuthStore";
+import { Button } from "../components/ui/Button";
+import { Input } from "../components/ui/Input";
+import { Card } from "../components/ui/Card";
 
 const loginSchema = z.object({
-  email: z.string().email('E-mail inválido'),
-  password: z.string().min(1, 'Senha é obrigatória'),
+  email: z.string().email("E-mail inválido"),
+  password: z.string().min(1, "Senha é obrigatória"),
 });
 
 type LoginForm = z.infer<typeof loginSchema>;
@@ -33,7 +33,7 @@ export const LoginPage: React.FC = () => {
     try {
       setIsLoading(true);
       await login(data.email, data.password);
-      navigate('/groups');
+      navigate("/groups");
     } catch (error) {
       console.error(error);
     } finally {
@@ -44,8 +44,8 @@ export const LoginPage: React.FC = () => {
   const handleAdminLogin = async () => {
     try {
       setIsLoading(true);
-      await login('admin', 'admin');
-      navigate('/groups');
+      await login("admin", "admin");
+      navigate("/groups");
     } finally {
       setIsLoading(false);
     }
@@ -73,20 +73,20 @@ export const LoginPage: React.FC = () => {
             placeholder="seu@email.com"
             icon={<Mail className="w-5 h-5" />}
             error={errors.email?.message}
-            {...register('email')}
+            {...register("email")}
           />
-          
+
           <Input
             label="Senha"
             type="password"
             placeholder="••••••••"
             icon={<Lock className="w-5 h-5" />}
             error={errors.password?.message}
-            {...register('password')}
+            {...register("password")}
           />
 
           <div className="flex justify-end">
-            <Link 
+            <Link
               to="/forgot-password"
               className="text-sm text-christmas-wine hover:text-christmas-wine-light font-medium transition-colors"
             >
@@ -94,9 +94,9 @@ export const LoginPage: React.FC = () => {
             </Link>
           </div>
 
-          <Button 
-            type="submit" 
-            className="w-full bg-christmas-wine hover:bg-christmas-wine-light text-white shadow-christmas-wine/20" 
+          <Button
+            type="submit"
+            className="w-full bg-christmas-wine hover:bg-christmas-wine-light text-white shadow-christmas-wine/20"
             size="lg"
             isLoading={isLoading}
           >
@@ -116,8 +116,8 @@ export const LoginPage: React.FC = () => {
             </div>
           </div>
 
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="w-full border-christmas-wine/20 text-christmas-wine hover:bg-christmas-wine/5"
             onClick={handleAdminLogin}
             disabled={isLoading}
@@ -126,9 +126,9 @@ export const LoginPage: React.FC = () => {
           </Button>
 
           <p className="text-sm text-gray-600">
-            Não tem uma conta?{' '}
-            <Link 
-              to="/register" 
+            Não tem uma conta?{" "}
+            <Link
+              to="/register"
               className="text-christmas-wine font-bold hover:underline"
             >
               Cadastre-se

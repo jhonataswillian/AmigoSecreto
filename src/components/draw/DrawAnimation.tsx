@@ -1,6 +1,6 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Gift } from 'lucide-react';
+import React from "react";
+import { motion } from "framer-motion";
+import { Gift } from "lucide-react";
 
 interface DrawAnimationProps {
   onComplete: () => void;
@@ -22,7 +22,7 @@ export const DrawAnimation: React.FC<DrawAnimationProps> = ({ onComplete }) => {
       >
         <Gift className="w-32 h-32" />
       </motion.div>
-      
+
       <motion.h2
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -38,10 +38,10 @@ export const DrawAnimation: React.FC<DrawAnimationProps> = ({ onComplete }) => {
             key={i}
             className="w-3 h-3 bg-white rounded-full"
             animate={{ y: [-10, 0, -10] }}
-            transition={{ 
-              duration: 0.6, 
-              repeat: Infinity, 
-              delay: i * 0.2 
+            transition={{
+              duration: 0.6,
+              repeat: Infinity,
+              delay: i * 0.2,
             }}
           />
         ))}

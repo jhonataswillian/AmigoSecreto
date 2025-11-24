@@ -15,7 +15,7 @@ export interface Group {
   maxPrice: number;
   ownerId: string;
   participants: Participant[];
-  status: 'created' | 'drawn';
+  status: "created" | "drawn";
 }
 
 export interface Participant {
@@ -38,7 +38,7 @@ export interface WishlistItem {
 }
 
 export interface GiftIdeas {
-  gender?: 'male' | 'female' | 'other' | 'prefer_not_say';
+  gender?: "male" | "female" | "other" | "prefer_not_say";
   ageRange?: string;
   likesSports?: boolean;
   sports?: string;

@@ -1,26 +1,32 @@
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, AtSign, ArrowRight } from 'lucide-react';
-import { useAuthStore } from '../store/useAuthStore';
-import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
-import { Card } from '../components/ui/Card';
+import React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Link, useNavigate } from "react-router-dom";
+import { Mail, Lock, User, AtSign, ArrowRight } from "lucide-react";
+import { useAuthStore } from "../store/useAuthStore";
+import { Button } from "../components/ui/Button";
+import { Input } from "../components/ui/Input";
+import { Card } from "../components/ui/Card";
 
-const registerSchema = z.object({
-  name: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres'),
-  handle: z.string()
-    .min(3, 'Handle deve ter no mínimo 3 caracteres')
-    .regex(/^@[a-zA-Z0-9_]+$/, 'Handle deve começar com @ e conter apenas letras, números e underline'),
-  email: z.string().email('E-mail inválido'),
-  password: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres'),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Senhas não conferem",
-  path: ["confirmPassword"],
-});
+const registerSchema = z
+  .object({
+    name: z.string().min(3, "Nome deve ter no mínimo 3 caracteres"),
+    handle: z
+      .string()
+      .min(3, "Handle deve ter no mínimo 3 caracteres")
+      .regex(
+        /^@[a-zA-Z0-9_]+$/,
+        "Handle deve começar com @ e conter apenas letras, números e underline",
+      ),
+    email: z.string().email("E-mail inválido"),
+    password: z.string().min(6, "Senha deve ter no mínimo 6 caracteres"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Senhas não conferem",
+    path: ["confirmPassword"],
+  });
 
 type RegisterForm = z.infer<typeof registerSchema>;
 
@@ -42,10 +48,10 @@ export const RegisterPage: React.FC = () => {
     try {
       setIsLoading(true);
       await registerUser(data.name, data.email, data.password, data.handle);
-      navigate('/groups');
+      navigate("/groups");
     } catch (error: unknown) {
-      if (error instanceof Error && error.message.includes('@handle')) {
-        setError('handle', { message: error.message });
+      if (error instanceof Error && error.message.includes("@handle")) {
+        setError("handle", { message: error.message });
       } else {
         console.error(error);
       }
@@ -61,9 +67,7 @@ export const RegisterPage: React.FC = () => {
           <h1 className="text-3xl font-display font-bold text-christmas-wine mb-2">
             Criar Conta
           </h1>
-          <p className="text-gray-600">
-            Junte-se à magia do Natal!
-          </p>
+          <p className="text-gray-600">Junte-se à magia do Natal!</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -72,7 +76,7 @@ export const RegisterPage: React.FC = () => {
             placeholder="Seu nome"
             icon={<User className="w-5 h-5" />}
             error={errors.name?.message}
-            {...register('name')}
+            {...register("name")}
           />
 
           <Input
@@ -80,7 +84,7 @@ export const RegisterPage: React.FC = () => {
             placeholder="@seu_nome"
             icon={<AtSign className="w-5 h-5" />}
             error={errors.handle?.message}
-            {...register('handle')}
+            {...register("handle")}
           />
 
           <Input
@@ -89,7 +93,7 @@ export const RegisterPage: React.FC = () => {
             placeholder="seu@email.com"
             icon={<Mail className="w-5 h-5" />}
             error={errors.email?.message}
-            {...register('email')}
+            {...register("email")}
           />
 
           <Input
@@ -98,7 +102,7 @@ export const RegisterPage: React.FC = () => {
             placeholder="••••••"
             icon={<Lock className="w-5 h-5" />}
             error={errors.password?.message}
-            {...register('password')}
+            {...register("password")}
           />
 
           <Input
@@ -107,12 +111,12 @@ export const RegisterPage: React.FC = () => {
             placeholder="••••••"
             icon={<Lock className="w-5 h-5" />}
             error={errors.confirmPassword?.message}
-            {...register('confirmPassword')}
+            {...register("confirmPassword")}
           />
 
-          <Button 
-            type="submit" 
-            className="w-full mt-6" 
+          <Button
+            type="submit"
+            className="w-full mt-6"
             size="lg"
             isLoading={isLoading}
           >
@@ -122,8 +126,11 @@ export const RegisterPage: React.FC = () => {
 
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
-            Já tem uma conta?{' '}
-            <Link to="/login" className="font-bold text-christmas-green hover:text-christmas-green-dark transition-colors">
+            Já tem uma conta?{" "}
+            <Link
+              to="/login"
+              className="font-bold text-christmas-green hover:text-christmas-green-dark transition-colors"
+            >
               Fazer Login
             </Link>
           </p>

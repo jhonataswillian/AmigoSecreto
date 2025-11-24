@@ -1,15 +1,16 @@
 @import "tailwindcss";
 
 @theme {
-  --color-christmas-wine: #722F37;
+  --color-christmas-wine: #722f37;
   --color-christmas-wine-light: #903c45;
-  --color-christmas-gold: #D4AF37;
-  --color-christmas-gold-light: #F4CF60;
-  --color-christmas-green: #1A472A;
-  --color-christmas-green-light: #2C5E3E;
-  --color-christmas-cream: #FDFBF7;
-  --color-christmas-silver: #E5E7EB;
-  --color-christmas-dark: #1A1A1A;
+  --color-christmas-gold: #d4af37;
+  --color-christmas-gold-light: #f4cf60;
+  --color-christmas-green: #1a472a;
+  --color-christmas-green-light: #2c5e3e;
+  --color-christmas-cream: #fdfbf7;
+  --color-christmas-silver: #e5e7eb;
+  --color-christmas-dark: #1a1a1a;
+  --color-christmas-red: #d42426;
 
   --font-sans: "Inter", system-ui, sans-serif;
   --font-display: "Playfair Display", serif;
@@ -19,27 +20,55 @@
   --animate-shine: shine 3s infinite;
 
   @keyframes snow {
-    0% { transform: translateY(-10vh) translateX(0); opacity: 1; }
-    100% { transform: translateY(100vh) translateX(20px); opacity: 0.3; }
+    0% {
+      transform: translateY(-10vh) translateX(0);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(100vh) translateX(20px);
+      opacity: 0.3;
+    }
   }
   @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
   }
   @keyframes shine {
-    0% { background-position: 200% center; }
-    100% { background-position: -200% center; }
+    0% {
+      background-position: 200% center;
+    }
+    100% {
+      background-position: -200% center;
+    }
   }
 }
 
 @layer base {
   body {
     @apply bg-christmas-cream text-christmas-dark font-sans antialiased overflow-x-hidden;
-    background-image: 
-      radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.15) 0%, transparent 50%),
-      radial-gradient(circle at 100% 0%, rgba(114, 47, 55, 0.1) 0%, transparent 30%);
+    background-image:
+      radial-gradient(
+        circle at 50% 0%,
+        rgba(212, 175, 55, 0.15) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 100% 0%,
+        rgba(114, 47, 55, 0.1) 0%,
+        transparent 30%
+      );
   }
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-display;
   }
 }

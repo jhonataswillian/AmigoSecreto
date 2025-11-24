@@ -22,7 +22,6 @@
 ### 🎁 Wishlist & Gifting
 
 - **Personal Wishlist**: Add, edit, and remove items from your wishlist to help your Secret Santa.
-- **Gift Ideas**: Not sure what to ask for? Use our interactive questionnaire to get tailored suggestions.
 - **Secret Viewing**: View your match's wishlist and get them the perfect gift.
 
 ### 👤 Profile & Avatars

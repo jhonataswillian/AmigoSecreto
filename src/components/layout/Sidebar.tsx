@@ -1,10 +1,10 @@
-import React from 'react';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Gift, Bell, User, LogOut, X } from 'lucide-react';
-import { useAuthStore } from '../../store/useAuthStore';
-import { useNotificationStore } from '../../store/useNotificationStore';
-import { clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import React from "react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { Home, Gift, Bell, User, LogOut, X } from "lucide-react";
+import { useAuthStore } from "../../store/useAuthStore";
+import { useNotificationStore } from "../../store/useNotificationStore";
+import { clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 function cn(...inputs: (string | undefined | null | false)[]) {
   return twMerge(clsx(inputs));
@@ -23,32 +23,32 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate("/login");
   };
 
   const navItems = [
-    { path: '/groups', icon: Home, label: 'Grupos' },
-    { path: '/wishlist', icon: Gift, label: 'Desejos' },
-    { path: '/notifications', icon: Bell, label: 'Avisos', badge: unreadCount },
-    { path: '/profile', icon: User, label: 'Perfil' },
+    { path: "/groups", icon: Home, label: "Grupos" },
+    { path: "/wishlist", icon: Gift, label: "Desejos" },
+    { path: "/notifications", icon: Bell, label: "Avisos", badge: unreadCount },
+    { path: "/profile", icon: User, label: "Perfil" },
   ];
 
   return (
     <>
       {/* Mobile Backdrop */}
-      <div 
+      <div
         className={cn(
           "fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity duration-300 md:hidden",
-          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+          isOpen ? "opacity-100" : "opacity-0 pointer-events-none",
         )}
         onClick={onClose}
       />
 
       {/* Sidebar Container */}
-      <aside 
+      <aside
         className={cn(
           "fixed top-0 left-0 h-full w-72 bg-christmas-wine text-white z-50 transition-transform duration-300 ease-in-out shadow-2xl md:translate-x-0 md:static md:h-screen md:shadow-none",
-          isOpen ? "translate-x-0" : "-translate-x-full"
+          isOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
         <div className="flex flex-col h-full p-6">
@@ -62,7 +62,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 Amigo Secreto
               </h1>
             </div>
-            <button 
+            <button
               onClick={onClose}
               className="md:hidden text-white/80 hover:text-white transition-colors"
             >
@@ -73,8 +73,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           {/* User Info (Optional) */}
           {user && (
             <div className="mb-8 p-4 bg-white/10 rounded-2xl flex items-center gap-3 border border-white/10">
-              <img 
-                src={user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`} 
+              <img
+                src={
+                  user.avatar ||
+                  `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`
+                }
                 alt={user.name}
                 className="w-10 h-10 rounded-full bg-white/20"
               />
@@ -88,27 +91,34 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           {/* Navigation */}
           <nav className="flex-1 space-y-2">
             {navItems.map((item) => {
-              const isActive = location.pathname === item.path || 
-                             (item.path !== '/' && location.pathname.startsWith(item.path));
-              
+              const isActive =
+                location.pathname === item.path ||
+                (item.path !== "/" && location.pathname.startsWith(item.path));
+
               return (
                 <NavLink
                   key={item.path}
                   to={item.path}
                   onClick={() => onClose()}
-                  className={({ isActive }) => cn(
-                    "flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 font-medium group relative",
-                    isActive 
-                      ? "bg-white text-christmas-wine shadow-lg shadow-black/10" 
-                      : "text-white/80 hover:bg-white/10 hover:text-white"
-                  )}
+                  className={({ isActive }) =>
+                    cn(
+                      "flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 font-medium group relative",
+                      isActive
+                        ? "bg-white text-christmas-wine shadow-lg shadow-black/10"
+                        : "text-white/80 hover:bg-white/10 hover:text-white",
+                    )
+                  }
                 >
-                  <item.icon className={cn(
-                    "w-5 h-5 transition-transform duration-300 group-hover:scale-110",
-                    isActive ? "text-christmas-wine" : "text-white/70 group-hover:text-white"
-                  )} />
+                  <item.icon
+                    className={cn(
+                      "w-5 h-5 transition-transform duration-300 group-hover:scale-110",
+                      isActive
+                        ? "text-christmas-wine"
+                        : "text-white/70 group-hover:text-white",
+                    )}
+                  />
                   <span>{item.label}</span>
-                  
+
                   {item.badge !== undefined && item.badge > 0 && (
                     <span className="absolute right-4 bg-christmas-gold text-christmas-wine text-xs font-bold px-2 py-0.5 rounded-full shadow-sm">
                       {item.badge}

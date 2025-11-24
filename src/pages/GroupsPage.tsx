@@ -1,50 +1,109 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Plus, Users, Calendar, LayoutGrid, List, Gift } from 'lucide-react';
-import { useAuthStore } from '../store/useAuthStore';
-import { useGroupStore } from '../store/useGroupStore';
-import { Button } from '../components/ui/Button';
-import { Card } from '../components/ui/Card';
-import { clsx } from 'clsx';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Plus, Users, Calendar, LayoutGrid, List, Gift } from "lucide-react";
+import { useAuthStore } from "../store/useAuthStore";
+import { useGroupStore } from "../store/useGroupStore";
+import { Button } from "../components/ui/Button";
+import { Card } from "../components/ui/Card";
+import { clsx } from "clsx";
+import { Modal } from "../components/ui/Modal";
+import { Input } from "../components/ui/Input";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { DollarSign } from "lucide-react";
+
+const createGroupSchema = z.object({
+  name: z.string().min(3, "Nome do grupo é obrigatório"),
+  description: z.string().optional(),
+  eventDate: z.string().optional(),
+  maxPrice: z
+    .string()
+    .refine(
+      (val) => !isNaN(Number(val)) && Number(val) > 0,
+      "Valor deve ser um número maior que zero",
+    ),
+});
+
+type CreateGroupForm = z.infer<typeof createGroupSchema>;
 
 export const GroupsPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const { groups } = useGroupStore();
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [filter, setFilter] = useState<'all' | 'owned' | 'participating'>('all');
+  const { groups, createGroup } = useGroupStore();
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [filter, setFilter] = useState<"all" | "owned" | "participating">(
+    "all",
+  );
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<CreateGroupForm>({
+    resolver: zodResolver(createGroupSchema),
+  });
+
+  const onCreateGroup = async (data: CreateGroupForm) => {
+    if (!user) return;
+
+    try {
+      setIsLoading(true);
+      await createGroup({
+        name: data.name,
+        description: data.description || "",
+        eventDate: data.eventDate,
+        maxPrice: Number(data.maxPrice),
+        ownerId: user.id,
+      });
+      setIsCreateModalOpen(false);
+      reset();
+      // Ideally show success toast here
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const filteredGroups = groups.filter((g) => {
     const isOwner = g.ownerId === user?.id;
-    const isParticipant = g.participants.some((p) => p.userId === user?.id || p.email === user?.email);
+    const isParticipant = g.participants.some(
+      (p) => p.userId === user?.id || p.email === user?.email,
+    );
 
-    if (filter === 'owned') return isOwner;
-    if (filter === 'participating') return isParticipant && !isOwner;
+    if (filter === "owned") return isOwner;
+    if (filter === "participating") return isParticipant && !isOwner;
     return isOwner || isParticipant;
   });
 
-  const GroupCard = ({ group }: { group: typeof groups[0] }) => (
-    <Card 
+  const GroupCard = ({ group }: { group: (typeof groups)[0] }) => (
+    <Card
       className={clsx(
         "cursor-pointer hover:shadow-xl transition-all duration-300 group relative overflow-hidden border border-white/40",
-        viewMode === 'list' ? 'flex flex-row items-center p-4 gap-4' : 'p-0'
+        viewMode === "list" ? "flex flex-row items-center p-4 gap-4" : "p-0",
       )}
       onClick={() => navigate(`/groups/${group.id}`)}
     >
       {/* Status Badge */}
-      <div className={clsx(
-        "absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm z-10",
-        group.status === 'drawn' 
-          ? 'bg-christmas-green text-white' 
-          : 'bg-christmas-gold text-christmas-wine'
-      )}>
-        {group.status === 'drawn' ? 'Sorteado' : 'Aberto'}
+      <div
+        className={clsx(
+          "absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm z-10",
+          group.status === "drawn"
+            ? "bg-christmas-green text-white"
+            : "bg-christmas-gold text-christmas-wine",
+        )}
+      >
+        {group.status === "drawn" ? "Sorteado" : "Aberto"}
       </div>
 
       {/* Card Content */}
-      <div className={clsx(
-        viewMode === 'list' ? 'flex-1' : 'p-6 pt-12 space-y-4'
-      )}>
+      <div
+        className={clsx(viewMode === "list" ? "flex-1" : "p-6 pt-12 space-y-4")}
+      >
         <div className="flex items-start justify-between">
           <div>
             <h3 className="text-xl font-display font-bold text-christmas-wine group-hover:text-christmas-wine-light transition-colors">
@@ -56,23 +115,31 @@ export const GroupsPage: React.FC = () => {
           </div>
         </div>
 
-        <div className={clsx(
-          "flex items-center text-sm text-gray-500",
-          viewMode === 'list' ? 'mt-2 gap-6' : 'justify-between pt-4 border-t border-gray-100'
-        )}>
+        <div
+          className={clsx(
+            "flex items-center text-sm text-gray-500",
+            viewMode === "list"
+              ? "mt-2 gap-6"
+              : "justify-between pt-4 border-t border-gray-100",
+          )}
+        >
           <div className="flex items-center gap-2">
             <div className="p-1.5 bg-christmas-wine/5 rounded-lg text-christmas-wine">
               <Users className="w-4 h-4" />
             </div>
-            <span className="font-medium">{group.participants.length} participantes</span>
+            <span className="font-medium">
+              {group.participants.length} participantes
+            </span>
           </div>
-          
+
           {group.eventDate && (
             <div className="flex items-center gap-2">
               <div className="p-1.5 bg-christmas-gold/10 rounded-lg text-christmas-gold">
                 <Calendar className="w-4 h-4" />
               </div>
-              <span className="font-medium">{new Date(group.eventDate).toLocaleDateString()}</span>
+              <span className="font-medium">
+                {new Date(group.eventDate).toLocaleDateString()}
+              </span>
             </div>
           )}
         </div>
@@ -92,9 +159,9 @@ export const GroupsPage: React.FC = () => {
             Gerencie seus sorteios e participe da diversão
           </p>
         </div>
-        <Button 
-          size="lg" 
-          onClick={() => navigate('/groups/create')}
+        <Button
+          size="lg"
+          onClick={() => setIsCreateModalOpen(true)}
           className="bg-christmas-wine hover:bg-christmas-wine-light text-white shadow-lg shadow-christmas-wine/20"
         >
           <Plus className="w-5 h-5 mr-2" />
@@ -107,34 +174,34 @@ export const GroupsPage: React.FC = () => {
         {/* Filters */}
         <div className="flex p-1 bg-gray-100/50 rounded-xl w-full sm:w-auto overflow-x-auto">
           <button
-            onClick={() => setFilter('all')}
+            onClick={() => setFilter("all")}
             className={clsx(
               "px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 flex-1 sm:flex-none whitespace-nowrap",
-              filter === 'all' 
-                ? "bg-white text-christmas-wine shadow-sm" 
-                : "text-gray-500 hover:text-christmas-wine"
+              filter === "all"
+                ? "bg-white text-christmas-wine shadow-sm"
+                : "text-gray-500 hover:text-christmas-wine",
             )}
           >
             Todos
           </button>
           <button
-            onClick={() => setFilter('owned')}
+            onClick={() => setFilter("owned")}
             className={clsx(
               "px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 flex-1 sm:flex-none whitespace-nowrap",
-              filter === 'owned' 
-                ? "bg-white text-christmas-wine shadow-sm" 
-                : "text-gray-500 hover:text-christmas-wine"
+              filter === "owned"
+                ? "bg-white text-christmas-wine shadow-sm"
+                : "text-gray-500 hover:text-christmas-wine",
             )}
           >
             Meus Grupos
           </button>
           <button
-            onClick={() => setFilter('participating')}
+            onClick={() => setFilter("participating")}
             className={clsx(
               "px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 flex-1 sm:flex-none whitespace-nowrap",
-              filter === 'participating' 
-                ? "bg-white text-christmas-wine shadow-sm" 
-                : "text-gray-500 hover:text-christmas-wine"
+              filter === "participating"
+                ? "bg-white text-christmas-wine shadow-sm"
+                : "text-gray-500 hover:text-christmas-wine",
             )}
           >
             Grupos Participantes
@@ -144,19 +211,23 @@ export const GroupsPage: React.FC = () => {
         {/* View Toggle */}
         <div className="flex items-center gap-2 bg-white rounded-lg p-1 border border-gray-100">
           <button
-            onClick={() => setViewMode('grid')}
+            onClick={() => setViewMode("grid")}
             className={clsx(
               "p-2 rounded-md transition-colors",
-              viewMode === 'grid' ? "bg-christmas-wine/10 text-christmas-wine" : "text-gray-400 hover:text-gray-600"
+              viewMode === "grid"
+                ? "bg-christmas-wine/10 text-christmas-wine"
+                : "text-gray-400 hover:text-gray-600",
             )}
           >
             <LayoutGrid className="w-4 h-4" />
           </button>
           <button
-            onClick={() => setViewMode('list')}
+            onClick={() => setViewMode("list")}
             className={clsx(
               "p-2 rounded-md transition-colors",
-              viewMode === 'list' ? "bg-christmas-wine/10 text-christmas-wine" : "text-gray-400 hover:text-gray-600"
+              viewMode === "list"
+                ? "bg-christmas-wine/10 text-christmas-wine"
+                : "text-gray-400 hover:text-gray-600",
             )}
           >
             <List className="w-4 h-4" />
@@ -174,28 +245,97 @@ export const GroupsPage: React.FC = () => {
             Nenhum grupo encontrado
           </h3>
           <p className="text-gray-500 mb-8 max-w-md mx-auto">
-            {filter === 'owned' 
+            {filter === "owned"
               ? "Você ainda não criou nenhum grupo."
-              : filter === 'participating'
-              ? "Você não está participando de nenhum grupo."
-              : "Você não tem grupos ainda."}
+              : filter === "participating"
+                ? "Você não está participando de nenhum grupo."
+                : "Você não tem grupos ainda."}
           </p>
-          {filter !== 'participating' && (
-            <Button onClick={() => navigate('/groups/create')}>
+          {filter !== "participating" && (
+            <Button onClick={() => setIsCreateModalOpen(true)}>
               Criar Primeiro Grupo
             </Button>
           )}
         </Card>
       ) : (
-        <div className={clsx(
-          "grid gap-6",
-          viewMode === 'grid' ? "md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"
-        )}>
+        <div
+          className={clsx(
+            "grid gap-6",
+            viewMode === "grid"
+              ? "md:grid-cols-2 lg:grid-cols-3"
+              : "grid-cols-1",
+          )}
+        >
           {filteredGroups.map((group) => (
             <GroupCard key={group.id} group={group} />
           ))}
         </div>
       )}
+      <Modal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        title="Criar Novo Grupo"
+      >
+        <div className="mb-6 text-gray-600">
+          Preencha as informações abaixo para criar um novo grupo de desejos.
+        </div>
+
+        <form onSubmit={handleSubmit(onCreateGroup)} className="space-y-4">
+          <Input
+            label="Nome do Grupo"
+            placeholder="Ex: Família Silva 2025"
+            icon={<Users className="w-5 h-5" />}
+            error={errors.name?.message}
+            {...register("name")}
+          />
+
+          <div className="space-y-1">
+            <label className="block text-sm font-medium text-gray-700 ml-1">
+              Descrição{" "}
+              <span className="text-gray-400 font-normal">(Opcional)</span>
+            </label>
+            <textarea
+              className="w-full rounded-xl border-gray-200 bg-white px-4 py-2.5 text-gray-900 placeholder:text-gray-400 focus:border-christmas-red focus:ring-christmas-red transition-all duration-200 shadow-sm min-h-[100px]"
+              placeholder="Uma mensagem legal para o grupo..."
+              {...register("description")}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              label="Data do Evento"
+              type="date"
+              icon={<Calendar className="w-5 h-5" />}
+              error={errors.eventDate?.message}
+              {...register("eventDate")}
+            />
+
+            <Input
+              label="Valor Máximo (R$)"
+              type="number"
+              step="0.01"
+              placeholder="100.00"
+              icon={<DollarSign className="w-5 h-5" />}
+              error={errors.maxPrice?.message}
+              {...register("maxPrice")}
+            />
+          </div>
+
+          <div className="flex space-x-3 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => setIsCreateModalOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button type="submit" className="w-full" isLoading={isLoading}>
+              Criar Grupo
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };

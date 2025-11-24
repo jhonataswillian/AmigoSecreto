@@ -1,8 +1,8 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
 export interface Notification {
   id: string;
-  type: 'invite' | 'info' | 'success';
+  type: "invite" | "info" | "success";
   title: string;
   message: string;
   read: boolean;
@@ -14,7 +14,9 @@ export interface Notification {
 interface NotificationState {
   notifications: Notification[];
   unreadCount: number;
-  addNotification: (notification: Omit<Notification, 'id' | 'read' | 'date'>) => void;
+  addNotification: (
+    notification: Omit<Notification, "id" | "read" | "date">,
+  ) => void;
   markAsRead: (id: string) => void;
   markAllAsRead: () => void;
   removeNotification: (id: string) => void;
@@ -23,25 +25,26 @@ interface NotificationState {
 export const useNotificationStore = create<NotificationState>((set) => ({
   notifications: [
     {
-      id: '1',
-      type: 'invite',
-      title: 'Convite para Grupo',
+      id: "1",
+      type: "invite",
+      title: "Convite para Grupo",
       message: 'Você foi convidado para o "Amigo Secreto da Firma"!',
       read: false,
       date: new Date().toISOString(),
-      actionLabel: 'Ver Grupo',
-      actionLink: '/groups/1',
+      actionLabel: "Ver Grupo",
+      actionLink: "/groups/1",
     },
     {
-      id: '2',
-      type: 'info',
-      title: 'Sorteio Realizado!',
-      message: 'O sorteio do grupo "Família Silva" já aconteceu. Venha ver quem você tirou!',
+      id: "2",
+      type: "info",
+      title: "Sorteio Realizado!",
+      message:
+        'O sorteio do grupo "Família Silva" já aconteceu. Venha ver quem você tirou!',
       read: false,
       date: new Date(Date.now() - 86400000).toISOString(),
-      actionLabel: 'Ver Resultado',
-      actionLink: '/groups/2/reveal',
-    }
+      actionLabel: "Ver Resultado",
+      actionLink: "/groups/2/reveal",
+    },
   ],
   unreadCount: 2,
 
@@ -62,7 +65,7 @@ export const useNotificationStore = create<NotificationState>((set) => ({
   markAsRead: (id) =>
     set((state) => {
       const newNotifications = state.notifications.map((n) =>
-        n.id === id ? { ...n, read: true } : n
+        n.id === id ? { ...n, read: true } : n,
       );
       return {
         notifications: newNotifications,

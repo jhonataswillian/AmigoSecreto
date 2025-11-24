@@ -1,28 +1,45 @@
-import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar, DollarSign, UserPlus, Gift, ArrowLeft, Trash2, AlertTriangle } from 'lucide-react';
-import { useGroupStore } from '../store/useGroupStore';
-import { useAuthStore } from '../store/useAuthStore';
-import { useNotificationStore } from '../store/useNotificationStore';
-import { Button } from '../components/ui/Button';
-import { Card } from '../components/ui/Card';
-import { Modal } from '../components/ui/Modal';
-import { Input } from '../components/ui/Input';
-import { ParticipantList } from '../components/groups/ParticipantList';
-import { InviteModal } from '../components/groups/InviteModal';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import React from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import {
+  Calendar,
+  DollarSign,
+  UserPlus,
+  Gift,
+  ArrowLeft,
+  Trash2,
+  AlertTriangle,
+} from "lucide-react";
+import { useGroupStore } from "../store/useGroupStore";
+import { useAuthStore } from "../store/useAuthStore";
+import { useNotificationStore } from "../store/useNotificationStore";
+import { Button } from "../components/ui/Button";
+import { Card } from "../components/ui/Card";
+import { Modal } from "../components/ui/Modal";
+import { Input } from "../components/ui/Input";
+import { ParticipantList } from "../components/groups/ParticipantList";
+import { InviteModal } from "../components/groups/InviteModal";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 export const GroupDashboardPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { groups, getGroup, currentGroup, addParticipant, removeParticipant, draw, deleteGroup } = useGroupStore();
+  const {
+    groups,
+    getGroup,
+    currentGroup,
+    addParticipant,
+    removeParticipant,
+    draw,
+    deleteGroup,
+  } = useGroupStore();
   const user = useAuthStore((state) => state.user);
-  
+
   const [isInviteModalOpen, setIsInviteModalOpen] = React.useState(false);
   const [isDrawing, setIsDrawing] = React.useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
-  const [deleteConfirmationName, setDeleteConfirmationName] = React.useState('');
+  const [deleteConfirmationName, setDeleteConfirmationName] =
+    React.useState("");
   const [isDeleting, setIsDeleting] = React.useState(false);
 
   React.useEffect(() => {
@@ -34,33 +51,33 @@ export const GroupDashboardPage: React.FC = () => {
   const { findUserByHandle } = useAuthStore();
   const { addNotification } = useNotificationStore();
 
-  const handleInvite = async (value: string, type: 'email' | 'handle') => {
+  const handleInvite = async (value: string, type: "email" | "handle") => {
     if (!id || !currentGroup) return;
 
-    if (type === 'email') {
+    if (type === "email") {
       await addParticipant(id, {
-        name: value.split('@')[0],
+        name: value.split("@")[0],
         email: value,
       });
-      
+
       addNotification({
-        type: 'success',
-        title: 'Convite Enviado',
+        type: "success",
+        title: "Convite Enviado",
         message: `Convite enviado para ${value}`,
       });
     } else {
       // Handle invite
       const user = await findUserByHandle(value);
-      
+
       if (!user) {
-        alert('Usuário não encontrado!');
-        throw new Error('Usuário não encontrado');
+        alert("Usuário não encontrado!");
+        throw new Error("Usuário não encontrado");
       }
 
       // Check if already in group
-      if (currentGroup.participants.some(p => p.email === user.email)) {
-        alert('Este usuário já está no grupo!');
-        throw new Error('Usuário já no grupo');
+      if (currentGroup.participants.some((p) => p.email === user.email)) {
+        alert("Este usuário já está no grupo!");
+        throw new Error("Usuário já no grupo");
       }
 
       await addParticipant(id, {
@@ -71,10 +88,10 @@ export const GroupDashboardPage: React.FC = () => {
       });
 
       addNotification({
-        type: 'invite',
-        title: 'Você foi convidado!',
+        type: "invite",
+        title: "Você foi convidado!",
         message: `Você foi convidado para o grupo "${currentGroup.name}"`,
-        actionLabel: 'Ver Grupo',
+        actionLabel: "Ver Grupo",
         actionLink: `/groups/${id}`,
       });
     }
@@ -93,9 +110,9 @@ export const GroupDashboardPage: React.FC = () => {
     setIsDeleting(true);
     try {
       await deleteGroup(id);
-      navigate('/groups', { replace: true });
+      navigate("/groups", { replace: true });
     } catch (error) {
-      console.error('Failed to delete group:', error);
+      console.error("Failed to delete group:", error);
       setIsDeleting(false);
     }
   };
@@ -113,7 +130,7 @@ export const GroupDashboardPage: React.FC = () => {
     return (
       <div className="p-8 text-center">
         <p>Grupo não encontrado.</p>
-        <Button onClick={() => navigate('/groups')} className="mt-4">
+        <Button onClick={() => navigate("/groups")} className="mt-4">
           Voltar
         </Button>
       </div>
@@ -121,13 +138,13 @@ export const GroupDashboardPage: React.FC = () => {
   }
 
   const isOwner = user?.id === currentGroup.ownerId;
-  const isDrawn = currentGroup.status === 'drawn';
+  const isDrawn = currentGroup.status === "drawn";
 
   return (
     <div className="p-4 space-y-6 pb-20">
       <div className="flex items-center space-x-4">
-        <button 
-          onClick={() => navigate('/groups')}
+        <button
+          onClick={() => navigate("/groups")}
           className="p-2 hover:bg-gray-100 rounded-full transition-colors"
         >
           <ArrowLeft className="w-6 h-6 text-gray-600" />
@@ -136,9 +153,7 @@ export const GroupDashboardPage: React.FC = () => {
           <h1 className="text-2xl font-display font-bold text-christmas-wine">
             {currentGroup.name}
           </h1>
-          <p className="text-sm text-gray-500">
-            {currentGroup.description}
-          </p>
+          <p className="text-sm text-gray-500">{currentGroup.description}</p>
         </div>
       </div>
 
@@ -146,9 +161,11 @@ export const GroupDashboardPage: React.FC = () => {
         <Card className="p-4 flex flex-col items-center justify-center text-center space-y-2">
           <Calendar className="w-6 h-6 text-christmas-green" />
           <span className="text-sm font-medium">
-            {currentGroup.eventDate 
-              ? format(new Date(currentGroup.eventDate), "dd 'de' MMMM", { locale: ptBR })
-              : 'Data a definir'}
+            {currentGroup.eventDate
+              ? format(new Date(currentGroup.eventDate), "dd 'de' MMMM", {
+                  locale: ptBR,
+                })
+              : "Data a definir"}
           </span>
         </Card>
         <Card className="p-4 flex flex-col items-center justify-center text-center space-y-2">
@@ -167,14 +184,16 @@ export const GroupDashboardPage: React.FC = () => {
           </span>
         </div>
 
-        <ParticipantList 
+        <ParticipantList
           participants={currentGroup.participants}
           isOwner={isOwner}
-          onRemove={(participantId) => id && removeParticipant(id, participantId)}
+          onRemove={(participantId) =>
+            id && removeParticipant(id, participantId)
+          }
         />
 
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           className="w-full border-dashed"
           onClick={() => setIsInviteModalOpen(true)}
         >
@@ -185,8 +204,8 @@ export const GroupDashboardPage: React.FC = () => {
 
       {isOwner && (
         <div className="pt-8 border-t border-gray-100">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             className="w-full text-red-500 hover:text-red-600 hover:bg-red-50"
             onClick={() => setIsDeleteModalOpen(true)}
           >
@@ -199,8 +218,8 @@ export const GroupDashboardPage: React.FC = () => {
       {/* Floating Action Button for Draw or View Result */}
       <div className="fixed bottom-6 left-0 right-0 px-4 flex justify-center z-20">
         {isDrawn ? (
-          <Button 
-            size="lg" 
+          <Button
+            size="lg"
             className="w-full max-w-md shadow-xl animate-bounce-subtle"
             onClick={() => navigate(`/groups/${id}/reveal`)}
           >
@@ -208,8 +227,8 @@ export const GroupDashboardPage: React.FC = () => {
             Ver meu Amigo Secreto
           </Button>
         ) : isOwner ? (
-          <Button 
-            size="lg" 
+          <Button
+            size="lg"
             className="w-full max-w-md shadow-xl"
             disabled={currentGroup.participants.length < 3}
             onClick={handleDraw}
@@ -225,7 +244,7 @@ export const GroupDashboardPage: React.FC = () => {
         )}
       </div>
 
-      <InviteModal 
+      <InviteModal
         isOpen={isInviteModalOpen}
         onClose={() => setIsInviteModalOpen(false)}
         groupName={currentGroup.name}
@@ -244,7 +263,9 @@ export const GroupDashboardPage: React.FC = () => {
             <div className="text-sm">
               <p className="font-bold mb-1">Ação irreversível</p>
               <p>
-                Isso excluirá permanentemente o grupo <strong>{currentGroup.name}</strong> e todos os dados associados.
+                Isso excluirá permanentemente o grupo{" "}
+                <strong>{currentGroup.name}</strong> e todos os dados
+                associados.
               </p>
             </div>
           </div>
@@ -262,15 +283,15 @@ export const GroupDashboardPage: React.FC = () => {
           </div>
 
           <div className="flex gap-3 pt-2">
-            <Button 
-              variant="ghost" 
-              className="flex-1" 
+            <Button
+              variant="ghost"
+              className="flex-1"
               onClick={() => setIsDeleteModalOpen(false)}
             >
               Cancelar
             </Button>
-            <Button 
-              className="w-2/3 bg-red-600 hover:bg-red-700 text-white" 
+            <Button
+              className="w-2/3 bg-red-600 hover:bg-red-700 text-white"
               onClick={handleDeleteGroup}
               isLoading={isDeleting}
               disabled={deleteConfirmationName !== currentGroup.name}

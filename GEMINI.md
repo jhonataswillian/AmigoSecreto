@@ -31,7 +31,6 @@ Este documento define as diretrizes de atuação da IA (Gemini) no projeto **Ami
 ## 5. Organização e Arquitetura
 
 - **Estrutura de Pastas:**
-
   - `src/components/ui`: Componentes genéricos (Button, Input, Card).
   - `src/components/[feature]`: Componentes específicos de funcionalidade.
   - `src/pages`: Páginas da aplicação (rotas).
