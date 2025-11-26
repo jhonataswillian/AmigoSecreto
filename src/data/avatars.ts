@@ -1,4 +1,4 @@
-// Helper to load and sort avatars naturally (e.g. 1, 2, 10 instead of 1, 10, 2)
+// Helper to load and sort avatars naturally
 const loadAvatars = (modules: Record<string, unknown>) => {
   return Object.keys(modules)
     .sort((a, b) =>
@@ -7,18 +7,49 @@ const loadAvatars = (modules: Record<string, unknown>) => {
     .map((key) => modules[key] as string);
 };
 
+// Helper to interleave men and women avatars
+const loadInterleavedAvatars = (modules: Record<string, unknown>) => {
+  const keys = Object.keys(modules);
+  const men = keys
+    .filter((k) => k.includes("homem"))
+    .sort((a, b) =>
+      a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" }),
+    );
+  const women = keys
+    .filter((k) => k.includes("mulher"))
+    .sort((a, b) =>
+      a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" }),
+    );
+
+  const interleaved: string[] = [];
+  const maxLength = Math.max(men.length, women.length);
+
+  for (let i = 0; i < maxLength; i++) {
+    if (men[i]) interleaved.push(modules[men[i]] as string);
+    if (women[i]) interleaved.push(modules[women[i]] as string);
+  }
+
+  return interleaved;
+};
+
 // Dynamic imports
 const peopleModules = import.meta.glob(
   "../assets/images/pessoas/*.{png,jpg,jpeg,svg}",
   { eager: true, import: "default" },
 );
-const peopleAvatars = loadAvatars(peopleModules);
+const peopleAvatars = loadInterleavedAvatars(peopleModules);
 
 const petModules = import.meta.glob(
   "../assets/images/pets/*.{png,jpg,jpeg,svg}",
   { eager: true, import: "default" },
 );
 const petAvatars = loadAvatars(petModules);
+
+const christmasModules = import.meta.glob(
+  "../assets/images/natal/*.{png,jpg,jpeg,svg}",
+  { eager: true, import: "default" },
+);
+const christmasAvatars = loadAvatars(christmasModules);
 
 export interface AvatarCategory {
   id: string;
@@ -35,6 +66,11 @@ export interface Frame {
 
 export const AVATAR_CATEGORIES: AvatarCategory[] = [
   {
+    id: "christmas",
+    name: "Natal",
+    avatars: christmasAvatars,
+  },
+  {
     id: "cute",
     name: "Pets",
     avatars: petAvatars,
@@ -44,54 +80,7 @@ export const AVATAR_CATEGORIES: AvatarCategory[] = [
     name: "Pessoas",
     avatars: peopleAvatars,
   },
-  {
-    id: "objects",
-    name: "Objetos",
-    avatars: [
-      "https://api.dicebear.com/7.x/icons/svg?seed=Sofa",
-      "https://api.dicebear.com/7.x/icons/svg?seed=Chair",
-      "https://api.dicebear.com/7.x/icons/svg?seed=Lamp",
-      "https://api.dicebear.com/7.x/icons/svg?seed=Book",
-      "https://api.dicebear.com/7.x/icons/svg?seed=Cup",
-      "https://api.dicebear.com/7.x/icons/svg?seed=Clock",
-      "https://api.dicebear.com/7.x/icons/svg?seed=Camera",
-      "https://api.dicebear.com/7.x/icons/svg?seed=Headphones",
-      "https://api.dicebear.com/7.x/icons/svg?seed=Glasses",
-      "https://api.dicebear.com/7.x/icons/svg?seed=Watch",
-    ],
-  },
-  {
-    id: "christmas",
-    name: "Clássico Natal",
-    avatars: [
-      "https://api.dicebear.com/7.x/icons/svg?seed=Tree",
-      "https://api.dicebear.com/7.x/icons/svg?seed=Star",
-      "https://api.dicebear.com/7.x/icons/svg?seed=Bell",
-      "https://api.dicebear.com/7.x/icons/svg?seed=Snowflake",
-      "https://api.dicebear.com/7.x/icons/svg?seed=CandyCane",
-      "https://api.dicebear.com/7.x/icons/svg?seed=Stocking",
-      "https://api.dicebear.com/7.x/icons/svg?seed=Sleigh",
-      "https://api.dicebear.com/7.x/icons/svg?seed=Wreath",
-      "https://api.dicebear.com/7.x/icons/svg?seed=Candle",
-      "https://api.dicebear.com/7.x/icons/svg?seed=Ornament",
-    ],
-  },
-  {
-    id: "fun",
-    name: "Divertidos",
-    avatars: [
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=FunSanta&top=hat&accessories=sunglasses",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=FunElf&top=winterHat1&accessories=kurt",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=FunReindeer&top=winterHat2&accessories=prescription02",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=FunSnowman&top=winterHat3&accessories=wayfarers",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=FunGingerbread&top=hat&accessories=eyepatch",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=FunGrinch&top=winterHat1&accessories=round",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=FunPenguin&top=winterHat2&accessories=sunglasses",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=FunBear&top=winterHat3&accessories=kurt",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=FunFox&top=hat&accessories=prescription02",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=FunOwl&top=winterHat1&accessories=wayfarers",
-    ],
-  },
+
 ];
 
 export const FRAMES: Frame[] = [
