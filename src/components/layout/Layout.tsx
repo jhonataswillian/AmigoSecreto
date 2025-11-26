@@ -25,7 +25,7 @@ export const Layout: React.FC = () => {
   }
 
   return (
-    <div className="flex min-h-screen bg-christmas-cream">
+    <div className="flex h-screen overflow-hidden bg-christmas-cream">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
       <div className="flex-1 flex flex-col min-w-0 transition-all duration-300">

@@ -10,6 +10,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { useGroupStore } from "../store/useGroupStore";
+import type { Participant, WishlistItem } from "../types";
 import { useAuthStore } from "../store/useAuthStore";
 import { useNotificationStore } from "../store/useNotificationStore";
 import { Button } from "../components/ui/Button";
@@ -41,6 +42,8 @@ export const GroupDashboardPage: React.FC = () => {
   const [deleteConfirmationName, setDeleteConfirmationName] =
     React.useState("");
   const [isDeleting, setIsDeleting] = React.useState(false);
+  const [selectedParticipantForWishlist, setSelectedParticipantForWishlist] =
+    React.useState<Participant | null>(null);
 
   React.useEffect(() => {
     if (id) {
@@ -117,6 +120,19 @@ export const GroupDashboardPage: React.FC = () => {
     }
   };
 
+  const sortedParticipants = React.useMemo(() => {
+    if (!currentGroup) return [];
+    return [...currentGroup.participants].sort((a, b) => {
+      const isA = a.userId === user?.id || a.email === user?.email;
+      const isB = b.userId === user?.id || b.email === user?.email;
+
+      if (isA && !isB) return -1;
+      if (!isA && isB) return 1;
+
+      return a.name.localeCompare(b.name);
+    });
+  }, [currentGroup, user]);
+
   if (isDeleting) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
@@ -185,10 +201,13 @@ export const GroupDashboardPage: React.FC = () => {
         </div>
 
         <ParticipantList
-          participants={currentGroup.participants}
+          participants={sortedParticipants}
           isOwner={isOwner}
           onRemove={(participantId) =>
             id && removeParticipant(id, participantId)
+          }
+          onViewWishlist={(participant) =>
+            setSelectedParticipantForWishlist(participant)
           }
         />
 
@@ -300,6 +319,54 @@ export const GroupDashboardPage: React.FC = () => {
             </Button>
           </div>
         </div>
+      </Modal>
+      {/* Wishlist Modal */}
+      <Modal
+        isOpen={!!selectedParticipantForWishlist}
+        onClose={() => setSelectedParticipantForWishlist(null)}
+        title={`Lista de Presentes de ${selectedParticipantForWishlist?.name}`}
+      >
+        {selectedParticipantForWishlist?.wishlist &&
+        selectedParticipantForWishlist.wishlist.length > 0 ? (
+          <div className="space-y-4">
+            {selectedParticipantForWishlist.wishlist.map(
+              (item: WishlistItem) => (
+                <Card key={item.id} className="p-4">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="font-bold text-gray-900">{item.name}</h4>
+                      {item.description && (
+                        <p className="text-sm text-gray-500 mt-1">
+                          {item.description}
+                        </p>
+                      )}
+                      {item.link && (
+                        <a
+                          href={item.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-blue-500 hover:underline mt-2 inline-block"
+                        >
+                          Link Produto
+                        </a>
+                      )}
+                    </div>
+                    {item.price && (
+                      <span className="font-bold text-christmas-green">
+                        R$ {item.price.toFixed(2)}
+                      </span>
+                    )}
+                  </div>
+                </Card>
+              ),
+            )}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            <Gift className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+            <p>Esta pessoa ainda não adicionou presentes à lista.</p>
+          </div>
+        )}
       </Modal>
     </div>
   );

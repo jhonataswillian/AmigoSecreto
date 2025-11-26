@@ -3,8 +3,14 @@ export interface User {
   name: string;
   email: string;
   avatar?: string;
+  frame?: Frame;
   handle: string;
   isAdmin?: boolean;
+  handleChangedAt?: string; // ISO date string
+  nameChangedAt?: string; // ISO date string
+  preferences?: {
+    emailNotifications: boolean;
+  };
 }
 
 export interface Group {
@@ -23,7 +29,9 @@ export interface Participant {
   userId?: string; // Link to User if registered
   name: string;
   email?: string;
+  handle?: string;
   avatar?: string;
+  frame?: Frame;
   wishlist: WishlistItem[];
   giftIdeas?: GiftIdeas;
   assignedToId?: string; // The person they drew
@@ -45,4 +53,12 @@ export interface GiftIdeas {
   style?: string;
   interests: string[];
   maxPrice?: number;
+}
+
+export interface Frame {
+  id: string;
+  name: string;
+  class: string;
+  previewClass?: string;
+  image?: string;
 }

@@ -18,7 +18,7 @@ export const InviteModal: React.FC<InviteModalProps> = ({
   onInvite,
 }) => {
   const [inviteType, setInviteType] = React.useState<"email" | "handle">(
-    "email",
+    "handle",
   );
   const [value, setValue] = React.useState("");
   const [copied, setCopied] = React.useState(false);

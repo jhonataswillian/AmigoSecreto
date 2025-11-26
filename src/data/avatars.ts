@@ -51,17 +51,12 @@ const christmasModules = import.meta.glob(
 );
 const christmasAvatars = loadAvatars(christmasModules);
 
+import type { Frame } from "../types";
+
 export interface AvatarCategory {
   id: string;
   name: string;
   avatars: string[];
-}
-
-export interface Frame {
-  id: string;
-  name: string;
-  class: string;
-  previewClass?: string;
 }
 
 export const AVATAR_CATEGORIES: AvatarCategory[] = [
@@ -80,11 +75,27 @@ export const AVATAR_CATEGORIES: AvatarCategory[] = [
     name: "Pessoas",
     avatars: peopleAvatars,
   },
-
 ];
 
 export const FRAMES: Frame[] = [
   { id: "none", name: "Sem moldura", class: "" },
+
+  // Animadas
+  {
+    id: "snow-animated",
+    name: "Neve Animada",
+    class: "",
+  },
+  {
+    id: "rain-animated",
+    name: "Chuva",
+    class: "",
+  },
+  {
+    id: "wreath-animated",
+    name: "Guirlanda CSS",
+    class: "",
+  },
 
   // Natal Clássico
   {

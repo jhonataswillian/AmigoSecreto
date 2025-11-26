@@ -26,13 +26,13 @@ export const ForgotPasswordPage: React.FC = () => {
     resolver: zodResolver(forgotPasswordSchema),
   });
 
-  const onSubmit = async (data: ForgotPasswordForm) => {
+  const onSubmit = async () => {
     setIsLoading(true);
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1500));
     setIsLoading(false);
     setIsSent(true);
-    console.log("Recover password for:", data.email);
+    // console.log("Recover password for:", data.email);
   };
 
   return (

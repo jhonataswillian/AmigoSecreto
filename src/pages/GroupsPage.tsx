@@ -75,6 +75,7 @@ export const GroupsPage: React.FC = () => {
       (p) => p.userId === user?.id || p.email === user?.email,
     );
 
+    if (g.id === "4") return true; // Always show the mock group
     if (filter === "owned") return isOwner;
     if (filter === "participating") return isParticipant && !isOwner;
     return isOwner || isParticipant;

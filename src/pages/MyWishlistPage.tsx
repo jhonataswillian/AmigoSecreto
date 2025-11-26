@@ -114,17 +114,28 @@ export const MyWishlistPage: React.FC = () => {
             Minha Lista de Desejos
           </h1>
           <p className="text-gray-600 mt-1">
-            Ajude seu Amigo Secreto a escolher o presente perfeito
+            Ajude seu Amigo Secreto a escolher o presente perfeito para você!
           </p>
         </div>
-        <Button
-          onClick={() => handleOpenModal()}
-          size="lg"
-          className="bg-christmas-wine hover:bg-christmas-wine-light text-white shadow-lg shadow-christmas-wine/20"
-        >
-          <Plus className="w-5 h-5 mr-2" />
-          Novo Item
-        </Button>
+        <div className="flex items-center gap-4">
+          <span className="text-lg font-bold text-christmas-wine bg-christmas-wine/10 px-4 py-2 rounded-xl">
+            Presentes: {wishlist.length}/3
+          </span>
+          <Button
+            onClick={() => handleOpenModal()}
+            size="lg"
+            className="bg-christmas-wine hover:bg-christmas-wine-light text-white shadow-lg shadow-christmas-wine/20 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={wishlist.length >= 3}
+            title={
+              wishlist.length >= 3
+                ? "Você atingiu o limite de 3 presentes"
+                : "Adicionar novo presente"
+            }
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            Novo Item
+          </Button>
+        </div>
       </div>
 
       {/* Content */}
@@ -140,7 +151,11 @@ export const MyWishlistPage: React.FC = () => {
             Adicione itens que você gostaria de ganhar. Isso ajuda muito quem
             tirou você!
           </p>
-          <Button onClick={() => handleOpenModal()} variant="outline">
+          <Button
+            onClick={() => handleOpenModal()}
+            variant="outline"
+            disabled={wishlist.length >= 3}
+          >
             Adicionar Primeiro Item
           </Button>
         </Card>

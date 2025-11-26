@@ -1,12 +1,13 @@
 import { create } from "zustand";
 import type { Group, Participant } from "../types";
+import { AVATAR_CATEGORIES } from "../data/avatars";
 
 interface GroupState {
   /** List of all available groups */
   groups: Group[];
   /** The currently selected or active group */
   currentGroup: Group | null;
-  
+
   /**
    * Creates a new group with the provided data.
    * @param group The group data (excluding id, participants, and status)
@@ -183,6 +184,89 @@ export const useGroupStore = create<GroupState>((set, get) => ({
       status: "created",
       maxPrice: 100,
       eventDate: "2025-12-20",
+    },
+    {
+      id: "4",
+      name: "Grupo de Amigos (4 Pessoas)",
+      description: "Grupo de teste com 4 participantes.",
+      ownerId: "1",
+      participants: [
+        {
+          id: "m1",
+          name: "Alice Wonderland",
+          email: "alice@email.com",
+          handle: "@alice",
+          avatar: AVATAR_CATEGORIES.find((c) => c.id === "cute")?.avatars[0],
+          wishlist: [],
+        },
+        {
+          id: "m2",
+          name: "Bob Builder",
+          email: "bob@email.com",
+          handle: "@bob",
+          avatar: AVATAR_CATEGORIES.find((c) => c.id === "christmas")
+            ?.avatars[0],
+          wishlist: [
+            {
+              id: "w1",
+              name: "Kit de Ferramentas",
+              description: "Para construir coisas",
+              price: 89.9,
+              link: "https://www.mercadolivre.com.br/conversor-hdmi-para-vga-full-hd-1080p-com-audio-p2-adaptador-cabo-hdmi-macho-para-vga-plug-play-para-pc-notebook-monitor-projetor-tv-caixa-de-som-video-mais-audio-digital/p/MLB53430457#polycard_client=search-nordic&search_layout=stack&position=9&type=product&tracking_id=a0486da7-1744-4c47-8cb8-b0ad8780baaa&wid=MLB4088328829&sid=search",
+            },
+          ],
+        },
+        {
+          id: "m3",
+          name: "Charlie Chaplin",
+          email: "charlie@email.com",
+          handle: "@charlie",
+          avatar: AVATAR_CATEGORIES.find((c) => c.id === "cute")?.avatars[1],
+          wishlist: [
+            {
+              id: "w2",
+              name: "Chapéu Coco",
+              description: "Clássico",
+              price: 45.0,
+              link: "https://www.mercadolivre.com.br/conversor-hdmi-para-vga-full-hd-1080p-com-audio-p2-adaptador-cabo-hdmi-macho-para-vga-plug-play-para-pc-notebook-monitor-projetor-tv-caixa-de-som-video-mais-audio-digital/p/MLB53430457#polycard_client=search-nordic&search_layout=stack&position=9&type=product&tracking_id=a0486da7-1744-4c47-8cb8-b0ad8780baaa&wid=MLB4088328829&sid=search",
+            },
+            {
+              id: "w3",
+              name: "Bengala",
+              description: "De madeira",
+              price: 30.0,
+              link: "https://www.mercadolivre.com.br/conversor-hdmi-para-vga-full-hd-1080p-com-audio-p2-adaptador-cabo-hdmi-macho-para-vga-plug-play-para-pc-notebook-monitor-projetor-tv-caixa-de-som-video-mais-audio-digital/p/MLB53430457#polycard_client=search-nordic&search_layout=stack&position=9&type=product&tracking_id=a0486da7-1744-4c47-8cb8-b0ad8780baaa&wid=MLB4088328829&sid=search",
+            },
+          ],
+        },
+        {
+          id: "m4",
+          name: "Diana Prince",
+          email: "diana@email.com",
+          handle: "@diana",
+          avatar: AVATAR_CATEGORIES.find((c) => c.id === "christmas")
+            ?.avatars[1],
+          wishlist: Array.from({ length: 3 }).map((_, i) => ({
+            id: `w-mock-${i}`,
+            name: `Presente Incrível ${i + 1}`,
+            description: `Descrição do presente ${i + 1} que a Diana quer muito ganhar.`,
+            price: (i + 1) * 10.0,
+            link: "https://www.mercadolivre.com.br/conversor-hdmi-para-vga-full-hd-1080p-com-audio-p2-adaptador-cabo-hdmi-macho-para-vga-plug-play-para-pc-notebook-monitor-projetor-tv-caixa-de-som-video-mais-audio-digital/p/MLB53430457#polycard_client=search-nordic&search_layout=stack&position=9&type=product&tracking_id=a0486da7-1744-4c47-8cb8-b0ad8780baaa&wid=MLB4088328829&sid=search",
+          })),
+        },
+        {
+          id: "m5",
+          userId: "1", // Link to the Admin User
+          name: "Admin User",
+          email: "admin@example.com",
+          handle: "@admin",
+          avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Santa",
+          wishlist: [],
+        },
+      ],
+      status: "created",
+      maxPrice: 150,
+      eventDate: "2025-12-23",
     },
   ],
   currentGroup: null,

@@ -1,9 +1,10 @@
 import React from "react";
 import { AVATAR_CATEGORIES, FRAMES } from "../../data/avatars";
-import type { Frame } from "../../data/avatars";
+import type { Frame } from "../../types";
 import { Button } from "../ui/Button";
 import { Modal } from "../ui/Modal";
 import { clsx } from "clsx";
+import { FrameRenderer } from "./FrameRenderer";
 
 interface AvatarEditorProps {
   isOpen: boolean;
@@ -39,17 +40,20 @@ export const AvatarEditor: React.FC<AvatarEditorProps> = ({
       <div className="space-y-6">
         {/* Preview */}
         <div className="flex justify-center py-4">
-          <div
-            className={clsx(
-              "relative w-32 h-32 rounded-full overflow-hidden transition-all duration-300",
-              selectedFrame.class,
-            )}
-          >
-            <img
-              src={selectedAvatar}
-              alt="Preview"
-              className="w-full h-full object-cover"
-            />
+          <div className="relative w-32 h-32">
+            <div
+              className={clsx(
+                "w-full h-full rounded-full overflow-hidden transition-all duration-300",
+                selectedFrame.class,
+              )}
+            >
+              <img
+                src={selectedAvatar}
+                alt="Preview"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <FrameRenderer frame={selectedFrame} />
           </div>
         </div>
 
@@ -138,12 +142,18 @@ export const AvatarEditor: React.FC<AvatarEditorProps> = ({
                       : "border-gray-100",
                   )}
                 >
-                  <div
-                    className={clsx(
-                      "w-12 h-12 rounded-full bg-gray-200 mb-2",
-                      frame.class,
-                    )}
-                  />
+                  <div className="relative w-12 h-12 mb-2">
+                    <div
+                      className={clsx(
+                        "w-full h-full rounded-full bg-gray-200",
+                        frame.class,
+                      )}
+                    />
+                    {/* Small preview of the frame */}
+                    <div className="absolute inset-0 pointer-events-none transform scale-75">
+                      <FrameRenderer frame={frame} />
+                    </div>
+                  </div>
                   <span className="text-xs font-medium text-center text-gray-700">
                     {frame.name}
                   </span>

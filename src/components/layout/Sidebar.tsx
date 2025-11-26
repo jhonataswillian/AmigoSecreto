@@ -5,6 +5,8 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { useNotificationStore } from "../../store/useNotificationStore";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { FrameRenderer } from "../profile/FrameRenderer";
+import { FRAMES } from "../../data/avatars";
 
 function cn(...inputs: (string | undefined | null | false)[]) {
   return twMerge(clsx(inputs));
@@ -28,7 +30,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
   const navItems = [
     { path: "/groups", icon: Home, label: "Grupos" },
-    { path: "/wishlist", icon: Gift, label: "Desejos" },
+    { path: "/wishlist", icon: Gift, label: "Presentes" },
     { path: "/notifications", icon: Bell, label: "Avisos", badge: unreadCount },
     { path: "/profile", icon: User, label: "Perfil" },
   ];
@@ -51,7 +53,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           isOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        <div className="flex flex-col h-full p-6">
+        <div className="flex flex-col h-full p-6 overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
           {/* Header */}
           <div className="flex items-center justify-between mb-10">
             <div className="flex items-center gap-3">
@@ -73,14 +75,24 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           {/* User Info (Optional) */}
           {user && (
             <div className="mb-8 p-4 bg-white/10 rounded-2xl flex items-center gap-3 border border-white/10">
-              <img
-                src={
-                  user.avatar ||
-                  `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`
-                }
-                alt={user.name}
-                className="w-10 h-10 rounded-full bg-white/20"
-              />
+              <div className="relative w-10 h-10">
+                <div
+                  className={cn(
+                    "w-full h-full rounded-full overflow-hidden bg-white/20",
+                    user.frame?.class,
+                  )}
+                >
+                  <img
+                    src={
+                      user.avatar ||
+                      `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`
+                    }
+                    alt={user.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <FrameRenderer frame={user.frame || FRAMES[0]} />
+              </div>
               <div className="overflow-hidden">
                 <p className="font-bold text-sm truncate">{user.name}</p>
                 <p className="text-xs text-white/70 truncate">{user.handle}</p>
