@@ -134,11 +134,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isAuthenticated: false,
   wishlist: [],
 
-  login: async (email, password) => {
+  login: async (identifier, password) => {
     // Mock login logic
-    const foundUser = MOCK_USERS.find((u) => u.email === email);
+    const foundUser = MOCK_USERS.find(
+      (u) =>
+        u.email === identifier ||
+        u.handle.toLowerCase() === identifier.toLowerCase(),
+    );
 
-    if (foundUser || (email === "admin@example.com" && password === "admin")) {
+    if (
+      foundUser ||
+      (identifier === "admin@example.com" && password === "admin")
+    ) {
       const user = foundUser || MOCK_USERS[0];
       set({
         user,
@@ -164,12 +171,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
+    // If not found in mock, create a new session user (mock behavior)
+    // Determine if identifier is email-like
+    const isEmail = identifier.includes("@") && identifier.includes(".");
+    const email = isEmail
+      ? identifier
+      : `${identifier.replace("@", "")}@example.com`;
+    const handle = isEmail ? `@${identifier.split("@")[0]}` : identifier;
+
     set({
       user: {
         id: Math.random().toString(36).substr(2, 9),
         name: "Usuário Teste",
         email,
-        handle: "@usuario",
+        handle,
         avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
       },
       isAuthenticated: true,

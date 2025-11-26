@@ -1,3 +1,6 @@
+/**
+ * Represents a registered user in the system.
+ */
 export interface User {
   id: string;
   name: string;
@@ -13,6 +16,9 @@ export interface User {
   };
 }
 
+/**
+ * Represents a Secret Santa group.
+ */
 export interface Group {
   id: string;
   name: string;
@@ -24,6 +30,10 @@ export interface Group {
   status: "created" | "drawn";
 }
 
+/**
+ * Represents a participant in a group.
+ * Can be a registered user or a guest invited by email.
+ */
 export interface Participant {
   id: string;
   userId?: string; // Link to User if registered
@@ -37,6 +47,9 @@ export interface Participant {
   assignedToId?: string; // The person they drew
 }
 
+/**
+ * Represents an item in a user's wishlist.
+ */
 export interface WishlistItem {
   id: string;
   name: string;
@@ -45,6 +58,9 @@ export interface WishlistItem {
   link?: string;
 }
 
+/**
+ * Represents gift preferences and ideas for a participant.
+ */
 export interface GiftIdeas {
   gender?: "male" | "female" | "other" | "prefer_not_say";
   ageRange?: string;
@@ -55,6 +71,9 @@ export interface GiftIdeas {
   maxPrice?: number;
 }
 
+/**
+ * Represents a decorative frame for a user's avatar.
+ */
 export interface Frame {
   id: string;
   name: string;

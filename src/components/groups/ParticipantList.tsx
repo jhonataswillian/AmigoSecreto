@@ -36,7 +36,7 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({
           className="p-4 flex items-center justify-between"
         >
           <div className="flex items-center space-x-3">
-            <div className="relative w-12 h-12">
+            <div className="relative w-[3.3rem] h-[3.3rem]">
               <div
                 className={clsx(
                   "w-full h-full rounded-full overflow-hidden bg-gray-100",
@@ -51,7 +51,7 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-gray-400">
-                    <UserIcon className="w-6 h-6" />
+                    <UserIcon className="w-7 h-7" />
                   </div>
                 )}
               </div>
