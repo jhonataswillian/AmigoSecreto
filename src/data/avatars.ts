@@ -1,3 +1,25 @@
+// Helper to load and sort avatars naturally (e.g. 1, 2, 10 instead of 1, 10, 2)
+const loadAvatars = (modules: Record<string, unknown>) => {
+  return Object.keys(modules)
+    .sort((a, b) =>
+      a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" }),
+    )
+    .map((key) => modules[key] as string);
+};
+
+// Dynamic imports
+const peopleModules = import.meta.glob(
+  "../assets/images/pessoas/*.{png,jpg,jpeg,svg}",
+  { eager: true, import: "default" },
+);
+const peopleAvatars = loadAvatars(peopleModules);
+
+const petModules = import.meta.glob(
+  "../assets/images/pets/*.{png,jpg,jpeg,svg}",
+  { eager: true, import: "default" },
+);
+const petAvatars = loadAvatars(petModules);
+
 export interface AvatarCategory {
   id: string;
   name: string;
@@ -14,52 +36,13 @@ export interface Frame {
 export const AVATAR_CATEGORIES: AvatarCategory[] = [
   {
     id: "cute",
-    name: "Fofos",
-    avatars: [
-      "https://api.dicebear.com/7.x/icons/svg?seed=Cat",
-      "https://api.dicebear.com/7.x/icons/svg?seed=Dog",
-      "https://api.dicebear.com/7.x/icons/svg?seed=Rabbit",
-      "https://api.dicebear.com/7.x/icons/svg?seed=Bear",
-      "https://api.dicebear.com/7.x/icons/svg?seed=Fox",
-      "https://api.dicebear.com/7.x/icons/svg?seed=Penguin",
-      "https://api.dicebear.com/7.x/icons/svg?seed=Owl",
-      "https://api.dicebear.com/7.x/icons/svg?seed=Reindeer",
-      "https://api.dicebear.com/7.x/icons/svg?seed=GiftBox",
-      "https://api.dicebear.com/7.x/icons/svg?seed=Snowman",
-    ],
+    name: "Pets",
+    avatars: petAvatars,
   },
   {
     id: "people",
     name: "Pessoas",
-    avatars: [
-      // Men
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=b6e3f4",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka&backgroundColor=c0aede",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=Christopher&backgroundColor=d1d4f9",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=Jack&backgroundColor=ffdfbf",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=Jude&backgroundColor=ffd5dc",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=Robert&backgroundColor=c0aede",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=Sawyer&backgroundColor=d1d4f9",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=Easton&backgroundColor=b6e3f4",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=Ryker&backgroundColor=ffdfbf",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=Micah&backgroundColor=ffd5dc",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=James&backgroundColor=c0aede",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=George&backgroundColor=d1d4f9",
-
-      // Women
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=Sophia&backgroundColor=ffdfbf",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=Amelia&backgroundColor=ffd5dc",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=Isabella&backgroundColor=b6e3f4",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=Mia&backgroundColor=c0aede",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=Charlotte&backgroundColor=d1d4f9",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=Ava&backgroundColor=ffdfbf",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=Harper&backgroundColor=ffd5dc",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=Evelyn&backgroundColor=b6e3f4",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=Abigail&backgroundColor=c0aede",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=Emily&backgroundColor=d1d4f9",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=Elizabeth&backgroundColor=ffdfbf",
-      "https://api.dicebear.com/7.x/avataaars/svg?seed=Sofia&backgroundColor=ffd5dc",
-    ],
+    avatars: peopleAvatars,
   },
   {
     id: "objects",
