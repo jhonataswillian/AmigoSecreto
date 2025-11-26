@@ -182,7 +182,7 @@ export const FRAMES: Frame[] = [
     id: "rainbow",
     name: "Arco-íris",
     class:
-      "border-4 border-transparent bg-gradient-to-r from-red-500 via-yellow-500 to-blue-500 p-[2px] ring-2 ring-white",
+      "border-4 border-transparent bg-linear-to-r from-red-500 via-yellow-500 to-blue-500 p-[2px] ring-2 ring-white",
   },
   {
     id: "vintage",

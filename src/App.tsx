@@ -4,8 +4,7 @@ import { AuthPage } from "./pages/AuthPage";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
 import { GroupsPage } from "./pages/GroupsPage";
 import { GroupDashboardPage } from "./pages/GroupDashboardPage";
-import { DrawRevealPage } from "./pages/DrawRevealPage";
-import { WishlistPage } from "./pages/WishlistPage";
+
 import { ProfilePage } from "./pages/ProfilePage";
 import { MyWishlistPage } from "./pages/MyWishlistPage";
 import { NotificationsPage } from "./pages/NotificationsPage";
@@ -23,11 +22,7 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/groups" element={<GroupsPage />} />
             <Route path="/groups/:id" element={<GroupDashboardPage />} />
-            <Route path="/groups/:id/reveal" element={<DrawRevealPage />} />
-            <Route
-              path="/groups/:groupId/wishlist/:participantId"
-              element={<WishlistPage />}
-            />
+
             <Route path="/wishlist" element={<MyWishlistPage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/profile" element={<ProfilePage />} />

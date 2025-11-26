@@ -26,9 +26,9 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ) => {
     const variants = {
       primary:
-        "bg-gradient-to-r from-christmas-wine to-christmas-wine-light text-white shadow-lg shadow-christmas-wine/20 hover:shadow-xl hover:scale-[1.02] border border-white/10",
+        "bg-linear-to-r from-christmas-wine to-christmas-wine-light text-white shadow-lg shadow-christmas-wine/20 hover:shadow-xl hover:scale-[1.02] border border-white/10",
       secondary:
-        "bg-gradient-to-r from-christmas-green to-christmas-green-light text-white shadow-lg shadow-christmas-green/20 hover:shadow-xl hover:scale-[1.02] border border-white/10",
+        "bg-linear-to-r from-christmas-green to-christmas-green-light text-white shadow-lg shadow-christmas-green/20 hover:shadow-xl hover:scale-[1.02] border border-white/10",
       outline:
         "border-2 border-christmas-wine text-christmas-wine hover:bg-christmas-wine/5 hover:border-christmas-wine-light",
       ghost: "text-christmas-dark hover:bg-christmas-wine/5",

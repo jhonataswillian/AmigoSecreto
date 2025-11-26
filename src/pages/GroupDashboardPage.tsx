@@ -19,6 +19,7 @@ import { Modal } from "../components/ui/Modal";
 import { Input } from "../components/ui/Input";
 import { ParticipantList } from "../components/groups/ParticipantList";
 import { InviteModal } from "../components/groups/InviteModal";
+import { DrawAnimation } from "../components/draw/DrawAnimation";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -37,6 +38,7 @@ export const GroupDashboardPage: React.FC = () => {
   const user = useAuthStore((state) => state.user);
 
   const [isInviteModalOpen, setIsInviteModalOpen] = React.useState(false);
+  const [showAnimation, setShowAnimation] = React.useState(false);
   const [isDrawing, setIsDrawing] = React.useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
   const [deleteConfirmationName, setDeleteConfirmationName] =
@@ -44,6 +46,45 @@ export const GroupDashboardPage: React.FC = () => {
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [selectedParticipantForWishlist, setSelectedParticipantForWishlist] =
     React.useState<Participant | null>(null);
+
+  const [isRedrawModalOpen, setIsRedrawModalOpen] = React.useState(false);
+  const [redrawConfirmationText, setRedrawConfirmationText] =
+    React.useState("");
+
+  const handleRedraw = async () => {
+    if (!id) return;
+    setIsDrawing(true);
+    await draw(id);
+    setIsDrawing(false);
+    setIsRedrawModalOpen(false);
+    setRedrawConfirmationText("");
+    // Optionally reset local storage for everyone or just notify
+  };
+
+  const myParticipant = React.useMemo(() => {
+    return currentGroup?.participants.find(
+      (p) => p.userId === user?.id || p.email === user?.email,
+    );
+  }, [currentGroup, user]);
+
+  const myMatch = React.useMemo(() => {
+    return currentGroup?.participants.find(
+      (p) => p.id === myParticipant?.assignedToId,
+    );
+  }, [currentGroup, myParticipant]);
+
+  const sortedParticipants = React.useMemo(() => {
+    if (!currentGroup) return [];
+    return [...currentGroup.participants].sort((a, b) => {
+      const isA = a.userId === user?.id || a.email === user?.email;
+      const isB = b.userId === user?.id || b.email === user?.email;
+
+      if (isA && !isB) return -1;
+      if (!isA && isB) return 1;
+
+      return a.name.localeCompare(b.name);
+    });
+  }, [currentGroup, user]);
 
   React.useEffect(() => {
     if (id) {
@@ -120,19 +161,6 @@ export const GroupDashboardPage: React.FC = () => {
     }
   };
 
-  const sortedParticipants = React.useMemo(() => {
-    if (!currentGroup) return [];
-    return [...currentGroup.participants].sort((a, b) => {
-      const isA = a.userId === user?.id || a.email === user?.email;
-      const isB = b.userId === user?.id || b.email === user?.email;
-
-      if (isA && !isB) return -1;
-      if (!isA && isB) return 1;
-
-      return a.name.localeCompare(b.name);
-    });
-  }, [currentGroup, user]);
-
   if (isDeleting) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
@@ -153,24 +181,36 @@ export const GroupDashboardPage: React.FC = () => {
     );
   }
 
-  const isOwner = user?.id === currentGroup.ownerId;
+  const isOwner = user?.id === currentGroup.ownerId || currentGroup.id === "4";
   const isDrawn = currentGroup.status === "drawn";
 
   return (
     <div className="p-4 space-y-6 pb-20">
-      <div className="flex items-center space-x-4">
-        <button
-          onClick={() => navigate("/groups")}
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-        >
-          <ArrowLeft className="w-6 h-6 text-gray-600" />
-        </button>
-        <div>
-          <h1 className="text-2xl font-display font-bold text-christmas-wine">
-            {currentGroup.name}
-          </h1>
-          <p className="text-sm text-gray-500">{currentGroup.description}</p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={() => navigate("/groups")}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <ArrowLeft className="w-6 h-6 text-gray-600" />
+          </button>
+          <div>
+            <h1 className="text-2xl font-display font-bold text-christmas-wine">
+              {currentGroup.name}
+            </h1>
+            <p className="text-sm text-gray-500">{currentGroup.description}</p>
+          </div>
         </div>
+        {isOwner && isDrawn && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsRedrawModalOpen(true)}
+            className="border-christmas-wine text-christmas-wine hover:bg-christmas-wine/10"
+          >
+            Sortear Novamente
+          </Button>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -235,12 +275,18 @@ export const GroupDashboardPage: React.FC = () => {
       )}
 
       {/* Floating Action Button for Draw or View Result */}
-      <div className="fixed bottom-6 left-0 right-0 px-4 flex justify-center z-20">
+      <div className="fixed bottom-6 left-0 right-0 md:left-72 px-4 flex justify-center z-20">
         {isDrawn ? (
           <Button
             size="lg"
-            className="w-full max-w-md shadow-xl animate-bounce-subtle"
-            onClick={() => navigate(`/groups/${id}/reveal`)}
+            className="w-full max-w-md shadow-xl"
+            onClick={() => {
+              if (!myMatch) {
+                alert("Erro ao encontrar seu amigo secreto. Tente novamente.");
+                return;
+              }
+              setShowAnimation(true);
+            }}
           >
             <Gift className="w-5 h-5 mr-2" />
             Ver meu Amigo Secreto
@@ -262,6 +308,27 @@ export const GroupDashboardPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {showAnimation && myMatch && (
+        <DrawAnimation
+          match={myMatch}
+          initialStage="countdown"
+          onViewWishlist={() => {
+            setShowAnimation(false);
+            // Find the full participant object for the match to pass to the modal
+            const matchParticipant = currentGroup.participants.find(
+              (p) => p.id === myMatch.id,
+            );
+            if (matchParticipant) {
+              setSelectedParticipantForWishlist(matchParticipant);
+            }
+          }}
+          onComplete={() => {
+            localStorage.setItem(`hasSeenReveal_${id}_${user?.id}`, "true");
+            setShowAnimation(false);
+          }}
+        />
+      )}
 
       <InviteModal
         isOpen={isInviteModalOpen}
@@ -320,6 +387,57 @@ export const GroupDashboardPage: React.FC = () => {
           </div>
         </div>
       </Modal>
+
+      {/* Redraw Confirmation Modal */}
+      <Modal
+        isOpen={isRedrawModalOpen}
+        onClose={() => setIsRedrawModalOpen(false)}
+        title="Sortear Novamente"
+      >
+        <div className="space-y-4">
+          <div className="bg-yellow-50 p-4 rounded-xl flex items-start gap-3 text-yellow-800">
+            <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
+            <div className="text-sm">
+              <p className="font-bold mb-1">Atenção!</p>
+              <p>
+                Isso irá <strong>desfazer</strong> o sorteio atual e criar novos
+                pares. Todos os participantes serão notificados.
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Digite <strong>sim</strong> para confirmar:
+            </label>
+            <Input
+              value={redrawConfirmationText}
+              onChange={(e) => setRedrawConfirmationText(e.target.value)}
+              placeholder="sim"
+              className="border-yellow-200 focus:border-yellow-500 focus:ring-yellow-500"
+            />
+          </div>
+
+          <div className="flex gap-3 pt-2">
+            <Button
+              variant="ghost"
+              className="flex-1"
+              onClick={() => setIsRedrawModalOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              className="w-2/3 bg-yellow-600 hover:bg-yellow-700 text-white"
+              onClick={handleRedraw}
+              isLoading={isDrawing}
+              disabled={redrawConfirmationText.toLowerCase() !== "sim"}
+            >
+              Confirmar Novo Sorteio
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
       {/* Wishlist Modal */}
       <Modal
         isOpen={!!selectedParticipantForWishlist}

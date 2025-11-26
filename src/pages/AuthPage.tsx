@@ -160,7 +160,7 @@ export const AuthPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-b from-red-50 to-white overflow-hidden relative">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-linear-to-b from-red-50 to-white overflow-hidden relative">
       {/* Decorative Background Elements */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         <div className="absolute -top-20 -left-20 w-96 h-96 bg-christmas-red/5 rounded-full blur-3xl" />

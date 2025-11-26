@@ -32,7 +32,6 @@ export const ForgotPasswordPage: React.FC = () => {
     await new Promise((resolve) => setTimeout(resolve, 1500));
     setIsLoading(false);
     setIsSent(true);
-    // console.log("Recover password for:", data.email);
   };
 
   return (
