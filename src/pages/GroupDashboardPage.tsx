@@ -47,6 +47,11 @@ export const GroupDashboardPage: React.FC = () => {
   const [selectedParticipantForWishlist, setSelectedParticipantForWishlist] =
     React.useState<Participant | null>(null);
 
+  const [isRemoveParticipantModalOpen, setIsRemoveParticipantModalOpen] =
+    React.useState(false);
+  const [participantToRemove, setParticipantToRemove] =
+    React.useState<Participant | null>(null);
+
   const [isRedrawModalOpen, setIsRedrawModalOpen] = React.useState(false);
   const [redrawConfirmationText, setRedrawConfirmationText] =
     React.useState("");
@@ -233,32 +238,46 @@ export const GroupDashboardPage: React.FC = () => {
       </div>
 
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-gray-900">Participantes</h2>
-          <span className="text-sm text-gray-500">
-            {currentGroup.participants.length} pessoas
-          </span>
+        <div className="flex flex-col space-y-1">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold text-gray-900">Participantes</h2>
+            <span className="text-sm text-gray-500">
+              {currentGroup.participants.length} pessoas
+            </span>
+          </div>
+          <p className="text-xs text-gray-400 flex items-center gap-1">
+            <AlertTriangle className="w-3 h-3" />
+            Somente o administrador pode convidar, remover e sortear.
+          </p>
         </div>
 
         <ParticipantList
           participants={sortedParticipants}
           isOwner={isOwner}
-          onRemove={(participantId) =>
-            id && removeParticipant(id, participantId)
-          }
+          onRemove={(participantId) => {
+            const participant = currentGroup.participants.find(
+              (p) => p.id === participantId,
+            );
+            if (participant) {
+              setParticipantToRemove(participant);
+              setIsRemoveParticipantModalOpen(true);
+            }
+          }}
           onViewWishlist={(participant) =>
             setSelectedParticipantForWishlist(participant)
           }
         />
 
-        <Button
-          variant="outline"
-          className="w-full border-dashed"
-          onClick={() => setIsInviteModalOpen(true)}
-        >
-          <UserPlus className="w-4 h-4 mr-2" />
-          Convidar Amigos
-        </Button>
+        {isOwner && (
+          <Button
+            variant="outline"
+            className="w-full border-dashed"
+            onClick={() => setIsInviteModalOpen(true)}
+          >
+            <UserPlus className="w-4 h-4 mr-2" />
+            Convidar Amigos
+          </Button>
+        )}
       </div>
 
       {isOwner && (
@@ -485,6 +504,49 @@ export const GroupDashboardPage: React.FC = () => {
             <p>Esta pessoa ainda não adicionou presentes à lista.</p>
           </div>
         )}
+      </Modal>
+
+      {/* Remove Participant Confirmation Modal */}
+      <Modal
+        isOpen={isRemoveParticipantModalOpen}
+        onClose={() => setIsRemoveParticipantModalOpen(false)}
+        title="Remover Participante"
+      >
+        <div className="space-y-4">
+          <div className="bg-red-50 p-4 rounded-xl flex items-start gap-3 text-red-800">
+            <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
+            <div className="text-sm">
+              <p className="font-bold mb-1">Confirmar remoção</p>
+              <p>
+                Tem certeza que deseja remover{" "}
+                <strong>{participantToRemove?.name}</strong> (
+                {participantToRemove?.handle || "Convidado"}) do grupo?
+              </p>
+            </div>
+          </div>
+
+          <div className="flex gap-3 pt-2">
+            <Button
+              variant="ghost"
+              className="flex-1"
+              onClick={() => setIsRemoveParticipantModalOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              className="w-2/3 bg-red-600 hover:bg-red-700 text-white"
+              onClick={async () => {
+                if (id && participantToRemove) {
+                  await removeParticipant(id, participantToRemove.id);
+                  setIsRemoveParticipantModalOpen(false);
+                  setParticipantToRemove(null);
+                }
+              }}
+            >
+              Confirmar Remoção
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

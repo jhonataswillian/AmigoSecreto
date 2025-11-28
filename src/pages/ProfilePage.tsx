@@ -133,11 +133,8 @@ export const ProfilePage: React.FC = () => {
         frame: selectedFrame,
       });
 
-      // Update Name if changed and allowed
+      // Update Name if changed
       if (name !== user?.name) {
-        if (user?.nameChangedAt) {
-          throw new Error("Você já alterou seu nome uma vez.");
-        }
         await updateName(name);
       }
 
@@ -293,26 +290,16 @@ export const ProfilePage: React.FC = () => {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       icon={<User className="w-5 h-5" />}
-                      disabled={!!user?.nameChangedAt}
                     />
-                    {user?.nameChangedAt ? (
-                      <p className="text-xs text-orange-500 flex items-center gap-1">
-                        <AlertTriangle className="w-3 h-3" />
-                        Você já alterou seu nome de exibição uma vez.
-                      </p>
-                    ) : (
-                      <p className="text-xs text-gray-400">
-                        Atenção: Você só poderá alterar seu nome de exibição uma
-                        vez.
-                      </p>
-                    )}
+                    <p className="text-xs text-gray-400">
+                      Este é o nome que aparecerá para seus amigos nos grupos.
+                    </p>
                   </div>
 
                   <Button
                     onClick={handleSaveProfile}
                     isLoading={isLoading}
                     className="w-full"
-                    disabled={!!user?.nameChangedAt && name === user?.name}
                   >
                     <Save className="w-4 h-4 mr-2" />
                     Salvar Perfil

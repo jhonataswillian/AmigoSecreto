@@ -352,17 +352,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     if (!user) throw new Error("Usuário não autenticado");
 
-    // Check if already changed
-    if (user.nameChangedAt) {
-      throw new Error("Você só pode alterar seu nome de exibição uma vez.");
-    }
-
     set((state) => ({
       user: state.user
         ? {
             ...state.user,
             name: newName,
-            nameChangedAt: new Date().toISOString(),
+            // nameChangedAt: new Date().toISOString(), // Optional: keep tracking if needed, but restriction is gone
           }
         : null,
     }));
