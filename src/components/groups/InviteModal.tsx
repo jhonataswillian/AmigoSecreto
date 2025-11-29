@@ -1,33 +1,42 @@
 import React from "react";
-import { Copy, Mail, Check } from "lucide-react";
+import { Copy, Check } from "lucide-react";
 import { Modal } from "../ui/Modal";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
+import { useGroupStore } from "../../store/useGroupStore";
 
 interface InviteModalProps {
   isOpen: boolean;
   onClose: () => void;
   groupName: string;
-  onInvite: (value: string, type: "email" | "handle") => Promise<void>;
+  groupId: string;
+  onInvite: (value: string) => Promise<void>;
 }
 
 export const InviteModal: React.FC<InviteModalProps> = ({
   isOpen,
   onClose,
   groupName,
+  groupId,
   onInvite,
 }) => {
-  const [inviteType, setInviteType] = React.useState<"email" | "handle">(
-    "handle",
-  );
+  const { createInvite } = useGroupStore();
+  // const [inviteType] = React.useState<"email" | "handle">("handle");
   const [value, setValue] = React.useState("");
   const [copied, setCopied] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
+  const [inviteLink, setInviteLink] = React.useState("");
+
+  React.useEffect(() => {
+    if (isOpen && groupId) {
+      createInvite(groupId).then((code) => {
+        setInviteLink(`${window.location.origin}/invite/${code}`);
+      });
+    }
+  }, [isOpen, groupId, createInvite]);
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(
-      `https://amigosecreto.app/invite/${Math.random().toString(36).substr(2)}`,
-    );
+    navigator.clipboard.writeText(inviteLink);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -38,7 +47,7 @@ export const InviteModal: React.FC<InviteModalProps> = ({
 
     setIsLoading(true);
     try {
-      await onInvite(value, inviteType);
+      await onInvite(value);
       setValue("");
       onClose();
     } catch (error) {
@@ -61,9 +70,13 @@ export const InviteModal: React.FC<InviteModalProps> = ({
           </label>
           <div className="flex space-x-2">
             <div className="flex-1 p-2 bg-gray-50 rounded-lg border border-gray-200 text-sm text-gray-500 truncate">
-              https://amigosecreto.app/invite/...
+              {inviteLink || "Gerando link..."}
             </div>
-            <Button variant="outline" onClick={handleCopyLink}>
+            <Button
+              variant="outline"
+              onClick={handleCopyLink}
+              disabled={!inviteLink}
+            >
               {copied ? (
                 <Check className="w-4 h-4" />
               ) : (
@@ -84,42 +97,12 @@ export const InviteModal: React.FC<InviteModalProps> = ({
           </div>
         </div>
 
-        <div className="flex p-1 bg-gray-100 rounded-xl">
-          <button
-            className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
-              inviteType === "email"
-                ? "bg-white shadow text-christmas-wine"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
-            onClick={() => setInviteType("email")}
-          >
-            Por E-mail
-          </button>
-          <button
-            className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
-              inviteType === "handle"
-                ? "bg-white shadow text-christmas-wine"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
-            onClick={() => setInviteType("handle")}
-          >
-            Por @Usuário
-          </button>
-        </div>
-
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
-            placeholder={
-              inviteType === "email" ? "E-mail do amigo" : "@usuario"
-            }
-            type={inviteType === "email" ? "email" : "text"}
-            icon={
-              inviteType === "email" ? (
-                <Mail className="w-5 h-5" />
-              ) : (
-                <span className="font-bold text-lg text-gray-400">@</span>
-              )
-            }
+            label="Nome de usuário"
+            placeholder="@usuario"
+            type="text"
+            icon={<span className="font-bold text-lg text-gray-400">@</span>}
             value={value}
             onChange={(e) => setValue(e.target.value)}
           />

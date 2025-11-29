@@ -36,7 +36,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             {...props}
           />
           {label && (
-            <label className="absolute -top-2.5 left-3 bg-white px-2 text-xs font-bold text-christmas-wine uppercase tracking-wider rounded-full shadow-sm">
+            <label className="absolute -top-2.5 left-3 bg-white px-2 text-xs font-bold text-christmas-wine uppercase tracking-wider rounded-full shadow-sm z-10 whitespace-nowrap max-w-[90%] truncate pointer-events-none">
               {label}
             </label>
           )}

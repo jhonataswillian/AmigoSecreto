@@ -16,7 +16,16 @@ import { DollarSign } from "lucide-react";
 const createGroupSchema = z.object({
   name: z.string().min(3, "Nome do grupo é obrigatório"),
   description: z.string().optional(),
-  eventDate: z.string().optional(),
+  eventDate: z
+    .string()
+    .min(1, "Data do evento é obrigatória")
+    .refine((dateString) => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const [year, month, day] = dateString.split("-").map(Number);
+      const eventDate = new Date(year, month - 1, day);
+      return eventDate >= today;
+    }, "A data do evento deve ser hoje ou no futuro"),
   maxPrice: z
     .string()
     .refine(
@@ -30,7 +39,11 @@ type CreateGroupForm = z.infer<typeof createGroupSchema>;
 export const GroupsPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const { groups, createGroup } = useGroupStore();
+  const { groups, createGroup, fetchGroups } = useGroupStore();
+
+  React.useEffect(() => {
+    fetchGroups();
+  }, [fetchGroups]);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [filter, setFilter] = useState<"all" | "owned" | "participating">(
     "all",
@@ -61,9 +74,11 @@ export const GroupsPage: React.FC = () => {
       });
       setIsCreateModalOpen(false);
       reset();
-      // Ideally show success toast here
     } catch (error) {
       console.error(error);
+      alert(
+        "Erro ao criar grupo. Verifique se você está logado e tente novamente.",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -71,14 +86,13 @@ export const GroupsPage: React.FC = () => {
 
   const filteredGroups = groups.filter((g) => {
     const isOwner = g.ownerId === user?.id;
-    const isParticipant = g.participants.some(
-      (p) => p.userId === user?.id || p.email === user?.email,
-    );
+    // Since RLS ensures we only fetch groups we belong to (owner or member),
+    // if we are not the owner, we are a participant.
+    // We cannot check g.participants because it only contains dummy objects for count.
 
-    if (g.id === "4") return true; // Always show the mock group
     if (filter === "owned") return isOwner;
-    if (filter === "participating") return isParticipant && !isOwner;
-    return isOwner || isParticipant;
+    if (filter === "participating") return !isOwner;
+    return true;
   });
 
   const GroupCard = ({ group }: { group: (typeof groups)[0] }) => (
@@ -121,7 +135,7 @@ export const GroupsPage: React.FC = () => {
             "flex items-center text-sm text-gray-500",
             viewMode === "list"
               ? "mt-2 gap-6"
-              : "justify-between pt-4 border-t border-gray-100",
+              : "justify-between pt-4 border-t border-gray-100 flex-wrap gap-2",
           )}
         >
           <div className="flex items-center gap-2">
@@ -302,12 +316,13 @@ export const GroupsPage: React.FC = () => {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               label="Data do Evento"
               type="date"
               icon={<Calendar className="w-5 h-5" />}
               error={errors.eventDate?.message}
+              min={new Date().toISOString().split("T")[0]}
               {...register("eventDate")}
             />
 

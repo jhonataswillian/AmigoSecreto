@@ -8,6 +8,8 @@ import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { Card } from "../components/ui/Card";
 
+import { useAuthStore } from "../store/useAuthStore";
+
 const forgotPasswordSchema = z.object({
   email: z.string().email("E-mail inválido"),
 });
@@ -17,6 +19,7 @@ type ForgotPasswordForm = z.infer<typeof forgotPasswordSchema>;
 export const ForgotPasswordPage: React.FC = () => {
   const [isSent, setIsSent] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
+  const { resetPassword } = useAuthStore();
 
   const {
     register,
@@ -26,12 +29,17 @@ export const ForgotPasswordPage: React.FC = () => {
     resolver: zodResolver(forgotPasswordSchema),
   });
 
-  const onSubmit = async () => {
-    setIsLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsLoading(false);
-    setIsSent(true);
+  const onSubmit = async (data: ForgotPasswordForm) => {
+    try {
+      setIsLoading(true);
+      await resetPassword(data.email);
+      setIsSent(true);
+    } catch (error) {
+      console.error(error);
+      alert("Erro ao enviar e-mail. Tente novamente.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

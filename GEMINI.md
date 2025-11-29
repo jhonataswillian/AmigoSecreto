@@ -31,6 +31,7 @@ Este documento define as diretrizes de atuação da IA (Gemini) no projeto **Ami
 ## 5. Organização e Arquitetura
 
 - **Estrutura de Pastas:**
+
   - `src/components/ui`: Componentes genéricos (Button, Input, Card).
   - `src/components/[feature]`: Componentes específicos de funcionalidade.
   - `src/pages`: Páginas da aplicação (rotas).
@@ -61,3 +62,15 @@ Este documento define as diretrizes de atuação da IA (Gemini) no projeto **Ami
 - Qualquer alteração futura deve seguir este documento.
 - Mantenha o padrão de qualidade e tipagem.
 - Atualize este documento apenas se solicitado explicitamente.
+
+## 9. Histórico de Auditoria
+
+- **Data:** 29/11/2025
+- **Ações Realizadas:**
+  - Remoção de código morto (dead code).
+  - Correção de 100% dos erros e warnings de ESLint.
+  - Formatação de todo o projeto com Prettier.
+  - Organização de arquivos SQL em pasta `database`.
+  - Implementação de limite de sessão de 24h.
+  - Verificação de build (`tsc` + `vite build`) com sucesso.
+  - Correção de linting específico em `Toast.tsx`, `JoinGroupPage.tsx`, `NotificationsPage.tsx` e `useNotificationStore.ts`.

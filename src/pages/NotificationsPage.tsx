@@ -1,52 +1,90 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import { Bell, Check, Trash2, Mail, Info, CheckCircle } from "lucide-react";
-import { useNotificationStore } from "../store/useNotificationStore";
-import { Button } from "../components/ui/Button";
+import React, { useEffect } from "react";
+import { useNotificationStore, type Notification } from "../store/useNotificationStore";
+import { useGroupStore } from "../store/useGroupStore";
+import { useAuthStore } from "../store/useAuthStore";
 import { Card } from "../components/ui/Card";
+import { Button } from "../components/ui/Button";
+import { Bell, Check, Trash2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { clsx } from "clsx";
+import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 export const NotificationsPage: React.FC = () => {
   const navigate = useNavigate();
-  const { notifications, markAsRead, markAllAsRead, removeNotification } =
-    useNotificationStore();
+  const {
+    notifications,
+    fetchNotifications,
+    markAsRead,
+    markAllAsRead,
+    removeNotification,
+    subscribeToNotifications,
+    unsubscribeFromNotifications,
+    isLoading,
+  } = useNotificationStore();
 
-  const getIcon = (type: string) => {
-    switch (type) {
-      case "invite":
-        return <Mail className="w-5 h-5 text-blue-500" />;
-      case "success":
-        return <CheckCircle className="w-5 h-5 text-green-500" />;
-      default:
-        return <Info className="w-5 h-5 text-christmas-gold" />;
+  const { addParticipant } = useGroupStore();
+  const { user } = useAuthStore();
+
+  useEffect(() => {
+    fetchNotifications();
+    subscribeToNotifications();
+    return () => unsubscribeFromNotifications();
+  }, [
+    fetchNotifications,
+    subscribeToNotifications,
+    unsubscribeFromNotifications,
+  ]);
+
+  const handleAcceptInvite = async (notification: Notification) => {
+    if (!user) return;
+    try {
+      const groupId = (notification.data as { groupId?: string })?.groupId;
+      if (!groupId) return;
+
+      await addParticipant(groupId, { userId: user.id });
+      await removeNotification(notification.id); // Remove invite after accept
+      navigate(`/groups/${groupId}`);
+    } catch (error) {
+      console.error(error);
+      alert(
+        "Erro ao aceitar convite. Talvez você já esteja no grupo ou ele não exista mais.",
+      );
     }
   };
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-display font-bold text-christmas-wine">
-          Notificações
-        </h1>
+        <div>
+          <h1 className="text-4xl font-display font-bold text-christmas-wine">
+            Notificações
+          </h1>
+          <p className="text-gray-600 mt-1">
+            Fique por dentro de tudo que acontece
+          </p>
+        </div>
         {notifications.length > 0 && (
-          <Button variant="ghost" size="sm" onClick={markAllAsRead}>
-            <Check className="w-4 h-4 mr-2" />
+          <Button variant="outline" onClick={() => markAllAsRead()}>
             Marcar todas como lidas
           </Button>
         )}
       </div>
 
-      {notifications.length === 0 ? (
-        <Card className="text-center py-12 border-dashed border-2 border-christmas-wine/10 bg-white/30">
-          <div className="w-20 h-20 bg-christmas-wine/5 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Bell className="w-10 h-10 text-christmas-wine/40" />
+      {isLoading && notifications.length === 0 ? (
+        <div className="flex justify-center py-12">
+          <div className="w-8 h-8 border-4 border-christmas-wine border-t-transparent rounded-full animate-spin" />
+        </div>
+      ) : notifications.length === 0 ? (
+        <Card className="p-12 text-center border-dashed border-2 border-gray-200 bg-gray-50/50">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Bell className="w-8 h-8 text-gray-400" />
           </div>
-          <h3 className="text-xl font-bold text-christmas-wine mb-2">
-            Tudo limpo por aqui!
+          <h3 className="text-lg font-medium text-gray-900">
+            Nenhuma notificação
           </h3>
-          <p className="text-gray-500 max-w-sm mx-auto">
-            Você não tem novas notificações no momento. Aproveite para verificar
-            seus grupos.
+          <p className="text-gray-500 mt-1">
+            Você não tem novos avisos ou convites no momento.
           </p>
         </Card>
       ) : (
@@ -55,73 +93,80 @@ export const NotificationsPage: React.FC = () => {
             <Card
               key={notification.id}
               className={clsx(
-                "transition-all duration-300 overflow-hidden",
-                !notification.read
-                  ? "border-l-4 border-l-christmas-wine bg-white shadow-md"
-                  : "opacity-70 hover:opacity-100 bg-white/50",
+                "p-4 transition-all duration-200",
+                !notification.read &&
+                  "bg-christmas-wine/5 border-christmas-wine/20",
               )}
             >
-              <div className="flex items-start gap-4 p-4">
+              <div className="flex items-start gap-4">
                 <div
                   className={clsx(
-                    "mt-1 p-2 rounded-full shadow-sm",
-                    !notification.read ? "bg-christmas-wine/10" : "bg-gray-100",
+                    "p-2 rounded-full shrink-0",
+                    notification.type === "invite"
+                      ? "bg-blue-100 text-blue-600"
+                      : "bg-gray-100 text-gray-600",
                   )}
                 >
-                  {getIcon(notification.type)}
+                  <Bell className="w-5 h-5" />
                 </div>
-
-                <div className="flex-1">
-                  <div className="flex justify-between items-start">
-                    <h3
-                      className={clsx(
-                        "font-bold text-lg",
-                        !notification.read
-                          ? "text-christmas-wine"
-                          : "text-gray-700",
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h4
+                        className={clsx(
+                          "font-bold",
+                          !notification.read
+                            ? "text-christmas-wine"
+                            : "text-gray-900",
+                        )}
+                      >
+                        {notification.title}
+                      </h4>
+                      <p className="text-gray-600 mt-1">
+                        {notification.message}
+                      </p>
+                      <span className="text-xs text-gray-400 mt-2 block">
+                        {formatDistanceToNow(
+                          new Date(notification.created_at),
+                          {
+                            addSuffix: true,
+                            locale: ptBR,
+                          },
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {!notification.read && (
+                        <button
+                          onClick={() => markAsRead(notification.id)}
+                          className="p-1 text-christmas-wine hover:bg-christmas-wine/10 rounded-full transition-colors"
+                          title="Marcar como lida"
+                        >
+                          <Check className="w-4 h-4" />
+                        </button>
                       )}
-                    >
-                      {notification.title}
-                    </h3>
-                    <span className="text-xs text-gray-400">
-                      {new Date(notification.date).toLocaleDateString()}
-                    </span>
+                      <button
+                        onClick={() => removeNotification(notification.id)}
+                        className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                        title="Remover"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
 
-                  <p className="text-gray-600 text-sm mt-1 mb-3">
-                    {notification.message}
-                  </p>
-
-                  <div className="flex items-center gap-3">
-                    {notification.actionLabel && notification.actionLink && (
+                  {notification.type === "invite" && (
+                    <div className="mt-4 flex gap-3">
                       <Button
                         size="sm"
-                        onClick={() => {
-                          markAsRead(notification.id);
-                          navigate(notification.actionLink!);
-                        }}
+                        onClick={() => handleAcceptInvite(notification)}
+                        className="bg-christmas-green hover:bg-christmas-green-light text-white"
                       >
-                        {notification.actionLabel}
+                        Aceitar Convite
                       </Button>
-                    )}
-                    {!notification.read && (
-                      <button
-                        onClick={() => markAsRead(notification.id)}
-                        className="text-sm text-gray-500 hover:text-christmas-green transition-colors"
-                      >
-                        Marcar como lida
-                      </button>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
-
-                <button
-                  onClick={() => removeNotification(notification.id)}
-                  className="text-gray-400 hover:text-red-500 transition-colors p-1"
-                  title="Remover"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
               </div>
             </Card>
           ))}

@@ -31,7 +31,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const navItems = [
     { path: "/groups", icon: Home, label: "Grupos" },
     { path: "/wishlist", icon: Gift, label: "Presentes" },
-    { path: "/notifications", icon: Bell, label: "Avisos", badge: unreadCount },
+    {
+      path: "/notifications",
+      icon: Bell,
+      label: "Notificações",
+      badge: unreadCount,
+    },
     { path: "/profile", icon: User, label: "Perfil" },
   ];
 

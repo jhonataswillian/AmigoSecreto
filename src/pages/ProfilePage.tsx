@@ -94,11 +94,13 @@ export const ProfilePage: React.FC = () => {
 
     try {
       await changePassword(oldPassword, newPassword);
+      setIsLoading(false);
       setIsPasswordModalOpen(false);
       setOldPassword("");
       setNewPassword("");
       setConfirmNewPassword("");
       setSuccess("Senha alterada com sucesso!");
+      alert("Senha alterada com sucesso!");
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);

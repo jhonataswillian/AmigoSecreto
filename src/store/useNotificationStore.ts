@@ -1,68 +1,62 @@
 import { create } from "zustand";
+import { supabase } from "../lib/supabase";
 
 export interface Notification {
   id: string;
-  type: "invite" | "info" | "success";
+  user_id: string;
+  type: "invite" | "info" | "success" | "warning";
   title: string;
   message: string;
+  data?: Record<string, unknown>;
   read: boolean;
-  date: string;
-  actionLabel?: string;
-  actionLink?: string;
+  created_at: string;
 }
 
 interface NotificationState {
   notifications: Notification[];
   unreadCount: number;
-  addNotification: (
-    notification: Omit<Notification, "id" | "read" | "date">,
-  ) => void;
-  markAsRead: (id: string) => void;
-  markAllAsRead: () => void;
-  removeNotification: (id: string) => void;
+  isLoading: boolean;
+
+  fetchNotifications: () => Promise<void>;
+  markAsRead: (id: string) => Promise<void>;
+  markAllAsRead: () => Promise<void>;
+  removeNotification: (id: string) => Promise<void>;
+  subscribeToNotifications: () => void;
+  unsubscribeFromNotifications: () => void;
 }
 
 export const useNotificationStore = create<NotificationState>((set) => ({
-  notifications: [
-    {
-      id: "1",
-      type: "invite",
-      title: "Convite para Grupo",
-      message: 'Você foi convidado para o "Amigo Secreto da Firma"!',
-      read: false,
-      date: new Date().toISOString(),
-      actionLabel: "Ver Grupo",
-      actionLink: "/groups/1",
-    },
-    {
-      id: "2",
-      type: "info",
-      title: "Sorteio Realizado!",
-      message:
-        'O sorteio do grupo "Família Silva" já aconteceu. Venha ver quem você tirou!',
-      read: false,
-      date: new Date(Date.now() - 86400000).toISOString(),
-      actionLabel: "Ver Resultado",
-      actionLink: "/groups/2/reveal",
-    },
-  ],
-  unreadCount: 2,
+  notifications: [],
+  unreadCount: 0,
+  isLoading: false,
 
-  addNotification: (data) =>
-    set((state) => {
-      const newNotification: Notification = {
-        ...data,
-        id: Math.random().toString(36).substr(2, 9),
-        read: false,
-        date: new Date().toISOString(),
-      };
-      return {
-        notifications: [newNotification, ...state.notifications],
-        unreadCount: state.unreadCount + 1,
-      };
-    }),
+  fetchNotifications: async () => {
+    set({ isLoading: true });
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
 
-  markAsRead: (id) =>
+    const { data, error } = await supabase
+      .from("notifications")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching notifications:", error);
+      return;
+    }
+
+    set({
+      notifications: data as Notification[],
+      unreadCount: data.filter((n) => !n.read).length,
+      isLoading: false,
+    });
+  },
+
+  markAsRead: async (id) => {
+    // Optimistic update
     set((state) => {
       const newNotifications = state.notifications.map((n) =>
         n.id === id ? { ...n, read: true } : n,
@@ -71,20 +65,88 @@ export const useNotificationStore = create<NotificationState>((set) => ({
         notifications: newNotifications,
         unreadCount: newNotifications.filter((n) => !n.read).length,
       };
-    }),
+    });
 
-  markAllAsRead: () =>
+    await supabase.from("notifications").update({ read: true }).eq("id", id);
+  },
+
+  markAllAsRead: async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
+
     set((state) => ({
       notifications: state.notifications.map((n) => ({ ...n, read: true })),
       unreadCount: 0,
-    })),
+    }));
 
-  removeNotification: (id) =>
+    await supabase
+      .from("notifications")
+      .update({ read: true })
+      .eq("user_id", user.id);
+  },
+
+  removeNotification: async (id) => {
     set((state) => {
       const newNotifications = state.notifications.filter((n) => n.id !== id);
       return {
         notifications: newNotifications,
         unreadCount: newNotifications.filter((n) => !n.read).length,
       };
-    }),
+    });
+
+    await supabase.from("notifications").delete().eq("id", id);
+  },
+
+  addNotification: (
+    notification: Omit<Notification, "id" | "user_id" | "read" | "created_at">,
+  ) => {
+    set((state) => ({
+      notifications: [
+        {
+          id: Math.random().toString(36).substr(2, 9),
+          user_id: "local",
+          read: false,
+          created_at: new Date().toISOString(),
+          ...notification,
+        },
+        ...state.notifications,
+      ],
+      unreadCount: state.unreadCount + 1,
+    }));
+  },
+
+  subscribeToNotifications: async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
+
+    supabase
+      .channel("notifications")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const newNotification = payload.new as Notification;
+          set((state) => ({
+            notifications: [newNotification, ...state.notifications],
+            unreadCount: state.unreadCount + 1,
+          }));
+        },
+      )
+      .subscribe();
+
+    // Store channel cleanup if needed, but for global store it's usually fine
+  },
+
+  unsubscribeFromNotifications: () => {
+    supabase.channel("notifications").unsubscribe();
+  },
 }));

@@ -8,11 +8,13 @@ import {
   ArrowLeft,
   Trash2,
   AlertTriangle,
+  LogOut, // Added LogOut import
+  Crown, // Added Crown
 } from "lucide-react";
 import { useGroupStore } from "../store/useGroupStore";
 import type { Participant, WishlistItem } from "../types";
 import { useAuthStore } from "../store/useAuthStore";
-import { useNotificationStore } from "../store/useNotificationStore";
+// import { useNotificationStore } from "../store/useNotificationStore";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { Modal } from "../components/ui/Modal";
@@ -22,18 +24,24 @@ import { InviteModal } from "../components/groups/InviteModal";
 import { DrawAnimation } from "../components/draw/DrawAnimation";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { supabase } from "../lib/supabase"; // Added supabase import
+
+import { useToast } from "../hooks/useToast";
 
 export const GroupDashboardPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { addToast } = useToast();
   const {
-    groups,
     getGroup,
     currentGroup,
-    addParticipant,
+    isLoading,
     removeParticipant,
     draw,
+    inviteUser,
     deleteGroup,
+    leaveGroup,
+    transferOwnership,
   } = useGroupStore();
   const user = useAuthStore((state) => state.user);
 
@@ -55,6 +63,10 @@ export const GroupDashboardPage: React.FC = () => {
   const [isRedrawModalOpen, setIsRedrawModalOpen] = React.useState(false);
   const [redrawConfirmationText, setRedrawConfirmationText] =
     React.useState("");
+  const [isLeaveModalOpen, setIsLeaveModalOpen] = React.useState(false); // Added isLeaveModalOpen state
+  const [isTransferModalOpen, setIsTransferModalOpen] = React.useState(false);
+  const [selectedNewAdmin, setSelectedNewAdmin] =
+    React.useState<Participant | null>(null);
 
   const handleRedraw = async () => {
     if (!id) return;
@@ -64,6 +76,47 @@ export const GroupDashboardPage: React.FC = () => {
     setIsRedrawModalOpen(false);
     setRedrawConfirmationText("");
     // Optionally reset local storage for everyone or just notify
+  };
+
+  const handleLeaveGroup = async () => {
+    if (!id) return;
+    try {
+      await leaveGroup(id);
+      addToast({
+        type: "success",
+        title: "Saiu do grupo",
+        message: "Você saiu do grupo com sucesso.",
+      });
+      navigate("/groups");
+    } catch (error) {
+      console.error(error);
+      addToast({
+        type: "error",
+        title: "Erro",
+        message: "Erro ao sair do grupo.",
+      });
+    }
+  };
+
+  const handleTransferOwnership = async () => {
+    if (!id || !selectedNewAdmin || !selectedNewAdmin.userId) return;
+    try {
+      await transferOwnership(id, selectedNewAdmin.userId);
+      addToast({
+        type: "success",
+        title: "Admin Transferido",
+        message: `Admin transferido para ${selectedNewAdmin.name}.`,
+      });
+      setIsTransferModalOpen(false);
+      setSelectedNewAdmin(null);
+    } catch (error) {
+      console.error(error);
+      addToast({
+        type: "error",
+        title: "Erro",
+        message: "Erro ao transferir admin.",
+      });
+    }
   };
 
   const myParticipant = React.useMemo(() => {
@@ -91,58 +144,72 @@ export const GroupDashboardPage: React.FC = () => {
     });
   }, [currentGroup, user]);
 
+  // Realtime Subscription
   React.useEffect(() => {
-    if (id) {
-      getGroup(id);
-    }
-  }, [id, groups, getGroup]); // Re-run if groups change (e.g. after create)
+    if (!id) return;
 
-  const { findUserByHandle } = useAuthStore();
-  const { addNotification } = useNotificationStore();
+    getGroup(id);
 
-  const handleInvite = async (value: string, type: "email" | "handle") => {
-    if (!id || !currentGroup) return;
+    // Subscribe to group_members changes
+    const channel = supabase
+      .channel(`group-members-${id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "group_members",
+          filter: `group_id=eq.${id}`,
+        },
+        () => {
+          getGroup(id);
+        },
+      )
+      .subscribe();
 
-    if (type === "email") {
-      await addParticipant(id, {
-        name: value.split("@")[0],
-        email: value,
-      });
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [id, getGroup]);
 
-      addNotification({
+  // const { findUserByHandle } = useAuthStore();
+  // const { addNotification } = useNotificationStore();
+
+  const handleInvite = async (value: string) => {
+    if (!id) return;
+
+    try {
+      await inviteUser(id, value);
+
+      addToast({
         type: "success",
         title: "Convite Enviado",
-        message: `Convite enviado para ${value}`,
+        message: `Convite enviado com sucesso para ${value}!`,
       });
-    } else {
-      // Handle invite
-      const user = await findUserByHandle(value);
+      setIsInviteModalOpen(false);
+    } catch (error: unknown) {
+      console.error(error);
+      const msg = (error as Error).message || "Erro ao enviar convite.";
 
-      if (!user) {
-        alert("Usuário não encontrado!");
-        throw new Error("Usuário não encontrado");
+      if (msg.includes("já está no grupo")) {
+        addToast({
+          type: "error",
+          title: "Já participa",
+          message: "Este usuário já está no grupo.",
+        });
+      } else if (msg.includes("não encontrado")) {
+        addToast({
+          type: "error",
+          title: "Não encontrado",
+          message: "Usuário não encontrado. Verifique o email ou handle.",
+        });
+      } else {
+        addToast({
+          type: "error",
+          title: "Erro",
+          message: msg,
+        });
       }
-
-      // Check if already in group
-      if (currentGroup.participants.some((p) => p.email === user.email)) {
-        alert("Este usuário já está no grupo!");
-        throw new Error("Usuário já no grupo");
-      }
-
-      await addParticipant(id, {
-        name: user.name,
-        email: user.email,
-        avatar: user.avatar,
-        userId: user.id,
-      });
-
-      addNotification({
-        type: "invite",
-        title: "Você foi convidado!",
-        message: `Você foi convidado para o grupo "${currentGroup.name}"`,
-        actionLabel: "Ver Grupo",
-        actionLink: `/groups/${id}`,
-      });
     }
   };
 
@@ -165,6 +232,14 @@ export const GroupDashboardPage: React.FC = () => {
       setIsDeleting(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-christmas-red"></div>
+      </div>
+    );
+  }
 
   if (isDeleting) {
     return (
@@ -190,30 +265,65 @@ export const GroupDashboardPage: React.FC = () => {
   const isDrawn = currentGroup.status === "drawn";
 
   return (
-    <div className="p-4 space-y-6 pb-20">
-      <div className="flex items-center justify-between">
+    <div className="p-4 space-y-6 pb-32">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center space-x-4">
           <button
             onClick={() => navigate("/groups")}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors shrink-0"
           >
             <ArrowLeft className="w-6 h-6 text-gray-600" />
           </button>
-          <div>
-            <h1 className="text-2xl font-display font-bold text-christmas-wine">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-2xl font-display font-bold text-christmas-wine truncate">
               {currentGroup.name}
             </h1>
-            <p className="text-sm text-gray-500">{currentGroup.description}</p>
+            <p className="text-sm text-gray-500 truncate">
+              {currentGroup.description}
+            </p>
           </div>
         </div>
-        {isOwner && isDrawn && (
+
+        {isOwner ? (
+          <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+            <Button
+              variant="outline"
+              onClick={() => setIsInviteModalOpen(true)}
+              size="sm"
+              className="w-full sm:w-auto justify-center"
+            >
+              <UserPlus className="w-4 h-4 mr-2" />
+              Convidar
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-christmas-gold text-christmas-gold hover:bg-christmas-gold/10 w-full sm:w-auto justify-center"
+              onClick={() => setIsTransferModalOpen(true)}
+            >
+              <Crown className="w-4 h-4 mr-2" />
+              Transferir Admin
+            </Button>
+            {isDrawn && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsRedrawModalOpen(true)}
+                className="border-christmas-wine text-christmas-wine hover:bg-christmas-wine/10 w-full sm:w-auto justify-center"
+              >
+                Sortear Novamente
+              </Button>
+            )}
+          </div>
+        ) : (
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setIsRedrawModalOpen(true)}
-            className="border-christmas-wine text-christmas-wine hover:bg-christmas-wine/10"
+            className="text-red-600 border-red-200 hover:bg-red-50"
+            onClick={() => setIsLeaveModalOpen(true)}
           >
-            Sortear Novamente
+            <LogOut className="w-4 h-4 mr-2" />
+            Sair do Grupo
           </Button>
         )}
       </div>
@@ -259,6 +369,16 @@ export const GroupDashboardPage: React.FC = () => {
               (p) => p.id === participantId,
             );
             if (participant) {
+              if (
+                isOwner &&
+                (participant.userId === user?.id ||
+                  participant.email === user?.email)
+              ) {
+                alert(
+                  "O administrador não pode sair do grupo. Você deve deletar o grupo se quiser encerrá-lo.",
+                );
+                return;
+              }
               setParticipantToRemove(participant);
               setIsRemoveParticipantModalOpen(true);
             }
@@ -266,7 +386,25 @@ export const GroupDashboardPage: React.FC = () => {
           onViewWishlist={(participant) =>
             setSelectedParticipantForWishlist(participant)
           }
-        />
+        >
+          {(participant) => (
+            <div>
+              <p className="font-bold text-gray-900 flex items-center gap-2">
+                {participant.name}
+                {participant.userId === currentGroup.ownerId && (
+                  <span className="text-yellow-500" title="Admin">
+                    <Crown className="w-4 h-4 fill-current" />
+                  </span>
+                )}
+              </p>
+              <p className="text-xs text-gray-500 font-medium">
+                {participant.handle
+                  ? `@${participant.handle.replace(/^@/, "")}`
+                  : participant.email}
+              </p>
+            </div>
+          )}
+        </ParticipantList>
 
         {isOwner && (
           <Button
@@ -353,6 +491,7 @@ export const GroupDashboardPage: React.FC = () => {
         isOpen={isInviteModalOpen}
         onClose={() => setIsInviteModalOpen(false)}
         groupName={currentGroup.name}
+        groupId={currentGroup.id}
         onInvite={handleInvite}
       />
 
@@ -466,6 +605,7 @@ export const GroupDashboardPage: React.FC = () => {
         {selectedParticipantForWishlist?.wishlist &&
         selectedParticipantForWishlist.wishlist.length > 0 ? (
           <div className="space-y-4">
+            ```
             {selectedParticipantForWishlist.wishlist.map(
               (item: WishlistItem) => (
                 <Card key={item.id} className="p-4">
@@ -504,6 +644,127 @@ export const GroupDashboardPage: React.FC = () => {
             <p>Esta pessoa ainda não adicionou presentes à lista.</p>
           </div>
         )}
+      </Modal>
+
+      {/* Leave Group Modal */}
+      <Modal
+        isOpen={isLeaveModalOpen}
+        onClose={() => setIsLeaveModalOpen(false)}
+        title="Sair do Grupo"
+      >
+        <div className="space-y-4">
+          <div className="bg-yellow-50 p-4 rounded-xl flex items-start gap-3 text-yellow-800">
+            <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
+            <div className="text-sm">
+              <p className="font-bold mb-1">Confirmar saída</p>
+              <p>
+                Tem certeza que deseja sair do grupo{" "}
+                <strong>{currentGroup.name}</strong>? Você precisará ser
+                convidado novamente para entrar.
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-3 pt-2">
+            <Button
+              variant="ghost"
+              className="flex-1"
+              onClick={() => setIsLeaveModalOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              className="w-2/3 bg-red-600 hover:bg-red-700 text-white"
+              onClick={handleLeaveGroup}
+            >
+              Sair do Grupo
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Transfer Admin Modal */}
+      <Modal
+        isOpen={isTransferModalOpen}
+        onClose={() => setIsTransferModalOpen(false)}
+        title="Transferir Administração"
+      >
+        <div className="space-y-4">
+          <div className="bg-blue-50 p-4 rounded-xl flex items-start gap-3 text-blue-800">
+            <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
+            <div className="text-sm">
+              <p className="font-bold mb-1">Atenção</p>
+              <p>
+                Selecione o novo administrador abaixo.{" "}
+                <strong>Você perderá seus privilégios de admin</strong>{" "}
+                imediatamente após a confirmação.
+              </p>
+            </div>
+          </div>
+
+          <div className="max-h-60 overflow-y-auto space-y-2 pr-1">
+            {currentGroup.participants
+              .filter((p) => p.userId !== user?.id)
+              .map((p) => (
+                <div
+                  key={p.id}
+                  className={`p-3 rounded-lg border cursor-pointer flex items-center gap-3 transition-colors ${selectedNewAdmin?.id === p.id ? "border-christmas-wine bg-christmas-wine/5 ring-1 ring-christmas-wine" : "border-gray-200 hover:border-christmas-wine/30 hover:bg-gray-50"}`}
+                  onClick={() => setSelectedNewAdmin(p)}
+                >
+                  <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden shrink-0">
+                    {p.avatar ? (
+                      <img
+                        src={p.avatar}
+                        alt={p.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gray-300 text-gray-500">
+                        <span className="text-xs font-bold">
+                          {p.name.charAt(0)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-gray-900 truncate">
+                      {p.name}
+                    </p>
+                    <p className="text-xs text-gray-500 truncate">
+                      {p.handle || p.email}
+                    </p>
+                  </div>
+                  {selectedNewAdmin?.id === p.id && (
+                    <div className="w-4 h-4 rounded-full bg-christmas-wine flex items-center justify-center">
+                      <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                    </div>
+                  )}
+                </div>
+              ))}
+
+            {currentGroup.participants.length <= 1 && (
+              <p className="text-center text-gray-500 py-4 text-sm">
+                Não há outros participantes para transferir a liderança.
+              </p>
+            )}
+          </div>
+
+          <div className="flex gap-3 pt-2">
+            <Button
+              variant="ghost"
+              className="flex-1"
+              onClick={() => setIsTransferModalOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              className="w-2/3 bg-christmas-wine text-white hover:bg-christmas-wine-light"
+              onClick={handleTransferOwnership}
+              disabled={!selectedNewAdmin}
+            >
+              Confirmar Transferência
+            </Button>
+          </div>
+        </div>
       </Modal>
 
       {/* Remove Participant Confirmation Modal */}

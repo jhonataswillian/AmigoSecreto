@@ -3,7 +3,15 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Mail, Lock, Gift, User, AtSign, ArrowRight } from "lucide-react";
+import {
+  Mail,
+  Lock,
+  Gift,
+  User,
+  AtSign,
+  ArrowRight,
+  Check,
+} from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
@@ -66,12 +74,19 @@ export const AuthPage: React.FC = () => {
   const [mode, setMode] = useState<"login" | "register">(initialMode);
   const [isLoading, setIsLoading] = useState(false);
 
+  // State for feedback
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [registerError, setRegisterError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [rememberEmail, setRememberEmail] = useState(false);
+
   // Login Form
   const {
     register: registerLogin,
     handleSubmit: handleSubmitLogin,
     formState: { errors: loginErrors },
-    watch: watchLogin,
+    setValue: setLoginValue,
+    reset: resetLogin,
   } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
   });
@@ -81,12 +96,36 @@ export const AuthPage: React.FC = () => {
     register: registerRegister,
     handleSubmit: handleSubmitRegister,
     formState: { errors: registerErrors },
-    setError: setRegisterError,
+    setError: setRegisterErrorForm,
     setValue: setRegisterValue,
     watch: watchRegister,
+    reset: resetRegister,
   } = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
   });
+
+  // Load saved email on mount
+  React.useEffect(() => {
+    const savedEmail = localStorage.getItem("saved_email");
+    if (savedEmail) {
+      setLoginValue("identifier", savedEmail);
+      setRememberEmail(true);
+    }
+  }, [setLoginValue]);
+
+  // Reset forms and errors when mode changes
+  React.useEffect(() => {
+    // Only reset if switching modes, but keep email if saved and going to login
+    if (mode === "register") {
+      resetRegister();
+    } else {
+      const savedEmail = localStorage.getItem("saved_email");
+      resetLogin({ identifier: savedEmail || "" });
+    }
+    setLoginError(null);
+    setRegisterError(null);
+    setSuccessMessage(null);
+  }, [mode, resetLogin, resetRegister]);
 
   // Handle auto-prefixing @ for handle
   const handleValue = watchRegister("handle");
@@ -96,32 +135,34 @@ export const AuthPage: React.FC = () => {
     }
   }, [handleValue, setRegisterValue]);
 
-  // Smart Login Input Logic
-  const loginIdentifier = watchLogin("identifier");
-  const isEmail =
-    loginIdentifier?.includes("@") && !loginIdentifier?.startsWith("@");
-  const loginIcon = isEmail ? (
-    <Mail className="w-5 h-5" />
-  ) : (
-    <AtSign className="w-5 h-5" />
-  );
-
   const onLoginSubmit = async (data: LoginForm) => {
     try {
       setIsLoading(true);
-      let identifier = data.identifier;
+      setLoginError(null);
 
-      // Auto-prefix @ if it looks like a handle (not an email and doesn't start with @)
-      const isLikelyEmail =
-        identifier.includes("@") && !identifier.startsWith("@");
-      if (!isLikelyEmail && !identifier.startsWith("@")) {
-        identifier = `@${identifier}`;
+      // Save or remove email based on checkbox
+      if (rememberEmail) {
+        localStorage.setItem("saved_email", data.identifier);
+      } else {
+        localStorage.removeItem("saved_email");
       }
 
-      await login(identifier, data.password);
+      await login(data.identifier, data.password);
       navigate("/groups");
     } catch (error) {
       console.error(error);
+      let message =
+        error instanceof Error
+          ? error.message
+          : "Falha ao fazer login. Verifique suas credenciais.";
+
+      if (message.includes("Invalid login credentials")) {
+        message = "E-mail ou senha incorretos.";
+      } else if (message.includes("Email not confirmed")) {
+        message = "E-mail não confirmado. Verifique sua caixa de entrada.";
+      }
+
+      setLoginError(message);
     } finally {
       setIsLoading(false);
     }
@@ -130,16 +171,43 @@ export const AuthPage: React.FC = () => {
   const onRegisterSubmit = async (data: RegisterForm) => {
     try {
       setIsLoading(true);
+      setRegisterError(null);
       const fullName = `${data.firstName} ${data.lastName}`.trim();
-      await registerUser(fullName, data.email, data.password, data.handle);
-      navigate("/groups");
-    } catch (error: unknown) {
-      if (error instanceof Error && error.message.includes("@handle")) {
-        setRegisterError("handle", { message: error.message });
+      const email = data.email.trim();
+
+      await registerUser(fullName, email, data.password, data.handle);
+
+      setSuccessMessage("Conta criada com sucesso! Redirecionando...");
+      setTimeout(() => {
+        navigate("/groups");
+      }, 1500);
+    } catch (error) {
+      console.error(error);
+      if (error instanceof Error) {
+        let message = error.message;
+
+        // Translations
+        if (message.includes("@usuário") || message.includes("@handle")) {
+          setRegisterErrorForm("handle", { message: message });
+          setIsLoading(false);
+          return;
+        }
+
+        if (message.includes("User already registered")) {
+          message = "Este e-mail já consta em nosso banco de dados.";
+        } else if (
+          message.includes("is invalid") ||
+          message.includes("valid email")
+        ) {
+          message = "E-mail inválido. Verifique se digitou corretamente.";
+        } else if (message.includes("Password should be")) {
+          message = "A senha não atende aos requisitos de segurança.";
+        }
+
+        setRegisterError(message);
       } else {
-        console.error(error);
+        setRegisterError("Erro ao criar conta. Tente novamente.");
       }
-    } finally {
       setIsLoading(false);
     }
   };
@@ -149,6 +217,10 @@ export const AuthPage: React.FC = () => {
       setIsLoading(true);
       await login("admin", "admin");
       navigate("/groups");
+    } catch (error) {
+      // error is unused but we need to catch it
+      console.error(error);
+      setLoginError("Erro ao acessar como admin.");
     } finally {
       setIsLoading(false);
     }
@@ -233,11 +305,17 @@ export const AuthPage: React.FC = () => {
                   onSubmit={handleSubmitLogin(onLoginSubmit)}
                   className="space-y-6"
                 >
+                  {loginError && (
+                    <div className="p-3 rounded-lg bg-red-50 border border-red-100 text-red-600 text-sm font-medium">
+                      {loginError}
+                    </div>
+                  )}
+
                   <div className="space-y-4">
                     <Input
-                      label="E-mail ou Usuário"
-                      placeholder="seu@email.com ou @usuario"
-                      icon={loginIcon}
+                      label="E-mail"
+                      placeholder="seu@email.com"
+                      icon={<Mail className="w-5 h-5" />}
                       error={loginErrors.identifier?.message}
                       {...registerLogin("identifier")}
                       className="bg-gray-50/50 border-gray-200 focus:bg-white transition-colors"
@@ -253,7 +331,25 @@ export const AuthPage: React.FC = () => {
                         {...registerLogin("password")}
                         className="bg-gray-50/50 border-gray-200 focus:bg-white transition-colors"
                       />
-                      <div className="flex justify-end">
+                      <div className="flex justify-between items-center mt-2">
+                        <label className="flex items-center gap-2 cursor-pointer group">
+                          <div className="relative flex items-center">
+                            <input
+                              type="checkbox"
+                              className="peer sr-only"
+                              checked={rememberEmail}
+                              onChange={(e) =>
+                                setRememberEmail(e.target.checked)
+                              }
+                            />
+                            <div className="w-4 h-4 border-2 border-gray-300 rounded transition-colors peer-checked:bg-christmas-wine peer-checked:border-christmas-wine peer-focus:ring-2 peer-focus:ring-christmas-wine/20" />
+                            <Check className="w-3 h-3 text-white absolute top-0.5 left-0.5 opacity-0 peer-checked:opacity-100 transition-opacity" />
+                          </div>
+                          <span className="text-xs text-gray-500 group-hover:text-christmas-wine transition-colors">
+                            Lembrar meu e-mail
+                          </span>
+                        </label>
+
                         <button
                           type="button"
                           onClick={() => navigate("/forgot-password")}
@@ -305,6 +401,17 @@ export const AuthPage: React.FC = () => {
                   onSubmit={handleSubmitRegister(onRegisterSubmit)}
                   className="space-y-4"
                 >
+                  {registerError && (
+                    <div className="p-3 rounded-lg bg-red-50 border border-red-100 text-red-600 text-sm font-medium">
+                      {registerError}
+                    </div>
+                  )}
+                  {successMessage && (
+                    <div className="p-3 rounded-lg bg-green-50 border border-green-100 text-green-600 text-sm font-medium">
+                      {successMessage}
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-2 gap-3">
                     <Input
                       label="Nome"

@@ -11,6 +11,7 @@ interface ParticipantListProps {
   isOwner: boolean;
   onRemove: (id: string) => void;
   onViewWishlist: (participant: Participant) => void;
+  children?: (participant: Participant) => React.ReactNode;
 }
 
 export const ParticipantList: React.FC<ParticipantListProps> = ({
@@ -18,6 +19,7 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({
   isOwner,
   onRemove,
   onViewWishlist,
+  children,
 }) => {
   if (participants.length === 0) {
     return (
@@ -58,10 +60,18 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({
               {participant.frame && <FrameRenderer frame={participant.frame} />}
             </div>
             <div>
-              <h4 className="font-medium text-gray-900">{participant.name}</h4>
-              <p className="text-xs text-gray-500">
-                {participant.handle || participant.email || "Convidado"}
-              </p>
+              {children ? (
+                children(participant)
+              ) : (
+                <>
+                  <h4 className="font-medium text-gray-900">
+                    {participant.name}
+                  </h4>
+                  <p className="text-xs text-gray-500">
+                    {participant.handle || participant.email || "Convidado"}
+                  </p>
+                </>
+              )}
             </div>
           </div>
 

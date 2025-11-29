@@ -1,394 +1,620 @@
 import { create } from "zustand";
-import type { Group, Participant } from "../types";
-import { AVATAR_CATEGORIES } from "../data/avatars";
+import type { Group, Participant, WishlistItem } from "../types";
+import { supabase } from "../lib/supabase";
 
 interface GroupState {
-  /** List of all available groups */
   groups: Group[];
-  /** The currently selected or active group */
   currentGroup: Group | null;
+  isLoading: boolean;
 
-  /**
-   * Creates a new group with the provided data.
-   * @param group The group data (excluding id, participants, and status)
-   * @returns The ID of the newly created group
-   */
   createGroup: (
     group: Omit<Group, "id" | "participants" | "status">,
   ) => Promise<string>;
-
-  /**
-   * Sets the current group by ID.
-   * @param id The ID of the group to retrieve
-   */
-  getGroup: (id: string) => void;
-
-  /**
-   * Adds a participant to a specific group.
-   * @param groupId The ID of the group
-   * @param participant The participant data
-   */
+  getGroup: (id: string) => Promise<void>;
+  inviteUser: (groupId: string, identifier: string) => Promise<void>;
   addParticipant: (
     groupId: string,
-    participant: Omit<Participant, "id" | "wishlist">,
+    participant: Partial<Participant>,
   ) => Promise<void>;
-
-  /**
-   * Removes a participant from a group.
-   * @param groupId The ID of the group
-   * @param participantId The ID of the participant to remove
-   */
   removeParticipant: (groupId: string, participantId: string) => Promise<void>;
-
-  /**
-   * Updates a participant's information within a group.
-   * @param groupId The ID of the group
-   * @param participantId The ID of the participant to update
-   * @param data The partial data to update
-   */
   updateParticipant: (
     groupId: string,
     participantId: string,
     data: Partial<Participant>,
   ) => Promise<void>;
-
-  /**
-   * Performs the Secret Santa draw for a group.
-   * Shuffles participants and assigns them to each other, ensuring no one draws themselves.
-   * @param groupId The ID of the group to draw
-   */
   draw: (groupId: string) => Promise<void>;
-
-  /**
-   * Deletes a group permanently.
-   * @param groupId The ID of the group to delete
-   */
+  leaveGroup: (groupId: string) => Promise<void>;
   deleteGroup: (groupId: string) => Promise<void>;
+  transferOwnership: (groupId: string, newOwnerId: string) => Promise<void>;
+  fetchGroups: () => Promise<void>;
+  createInvite: (groupId: string) => Promise<string>;
+  getInviteInfo: (
+    code: string,
+  ) => Promise<{ groupName: string; ownerName: string }>;
+  joinByInvite: (code: string) => Promise<string>;
 }
 
 export const useGroupStore = create<GroupState>((set, get) => ({
-  groups: [
-    {
-      id: "1",
-      name: "Grupo Mock 1 (Vazio)",
-      description: "Grupo para teste de convites.",
-      ownerId: "1",
-      participants: [],
-      status: "created",
-      maxPrice: 50,
-      eventDate: "2025-12-25",
-    },
-    {
-      id: "2",
-      name: "Família Silva (Cheio)",
-      description: "Grupo com participantes para teste de sorteio.",
-      ownerId: "1",
-      participants: [
-        {
-          id: "p1",
-          name: "João Silva",
-          email: "joao@email.com",
-          avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Joao",
-          wishlist: [],
-        },
-        {
-          id: "p2",
-          name: "Maria Silva",
-          email: "maria@email.com",
-          avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Maria",
-          wishlist: [],
-        },
-        {
-          id: "p3",
-          name: "Pedro Santos",
-          email: "pedro@email.com",
-          avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Pedro",
-          wishlist: [],
-        },
-        {
-          id: "p4",
-          name: "Ana Costa",
-          email: "ana@email.com",
-          avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Ana",
-          wishlist: [],
-        },
-        {
-          id: "p5",
-          name: "Carlos Oliveira",
-          email: "carlos@email.com",
-          avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Carlos",
-          wishlist: [],
-        },
-        {
-          id: "p6",
-          name: "Beatriz Lima",
-          email: "bia@email.com",
-          avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Bia",
-          wishlist: [],
-        },
-        {
-          id: "p7",
-          name: "Lucas Pereira",
-          email: "lucas@email.com",
-          avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Lucas",
-          wishlist: [],
-        },
-        {
-          id: "p8",
-          name: "Fernanda Souza",
-          email: "fernanda@email.com",
-          avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Fernanda",
-          wishlist: [],
-        },
-        {
-          id: "p9",
-          name: "Rafael Almeida",
-          email: "rafael@email.com",
-          avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Rafael",
-          wishlist: [],
-        },
-        {
-          id: "p10",
-          name: "Juliana Rocha",
-          email: "ju@email.com",
-          avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Juliana",
-          wishlist: [],
-        },
-      ],
-      status: "created",
-      maxPrice: 100,
-      eventDate: "2025-12-24",
-    },
-    {
-      id: "3",
-      name: "Amigo Secreto da Firma",
-      description: "Festa da empresa 2025.",
-      ownerId: "2",
-      participants: [
-        {
-          id: "p1",
-          name: "Chefe",
-          email: "boss@email.com",
-          avatar: "",
-          wishlist: [],
-        },
-        {
-          id: "p2",
-          name: "Jhonatas",
-          email: "admin@example.com",
-          userId: "1",
-          avatar: "",
-          wishlist: [],
-        },
-      ],
-      status: "created",
-      maxPrice: 100,
-      eventDate: "2025-12-20",
-    },
-    {
-      id: "4",
-      name: "Grupo de Amigos (4 Pessoas)",
-      description: "Grupo de teste com 4 participantes.",
-      ownerId: "1",
-      participants: [
-        {
-          id: "m1",
-          name: "Alice Wonderland",
-          email: "alice@email.com",
-          handle: "@alice",
-          avatar: AVATAR_CATEGORIES.find((c) => c.id === "cute")?.avatars[0],
-          wishlist: [],
-        },
-        {
-          id: "m2",
-          name: "Bob Builder",
-          email: "bob@email.com",
-          handle: "@bob",
-          avatar: AVATAR_CATEGORIES.find((c) => c.id === "christmas")
-            ?.avatars[0],
-          wishlist: [
-            {
-              id: "w1",
-              name: "Kit de Ferramentas",
-              description: "Para construir coisas",
-              price: 89.9,
-              link: "https://www.mercadolivre.com.br/conversor-hdmi-para-vga-full-hd-1080p-com-audio-p2-adaptador-cabo-hdmi-macho-para-vga-plug-play-para-pc-notebook-monitor-projetor-tv-caixa-de-som-video-mais-audio-digital/p/MLB53430457#polycard_client=search-nordic&search_layout=stack&position=9&type=product&tracking_id=a0486da7-1744-4c47-8cb8-b0ad8780baaa&wid=MLB4088328829&sid=search",
-            },
-          ],
-        },
-        {
-          id: "m3",
-          name: "Charlie Chaplin",
-          email: "charlie@email.com",
-          handle: "@charlie",
-          avatar: AVATAR_CATEGORIES.find((c) => c.id === "cute")?.avatars[1],
-          wishlist: [
-            {
-              id: "w2",
-              name: "Chapéu Coco",
-              description: "Clássico",
-              price: 45.0,
-              link: "https://www.mercadolivre.com.br/conversor-hdmi-para-vga-full-hd-1080p-com-audio-p2-adaptador-cabo-hdmi-macho-para-vga-plug-play-para-pc-notebook-monitor-projetor-tv-caixa-de-som-video-mais-audio-digital/p/MLB53430457#polycard_client=search-nordic&search_layout=stack&position=9&type=product&tracking_id=a0486da7-1744-4c47-8cb8-b0ad8780baaa&wid=MLB4088328829&sid=search",
-            },
-            {
-              id: "w3",
-              name: "Bengala",
-              description: "De madeira",
-              price: 30.0,
-              link: "https://www.mercadolivre.com.br/conversor-hdmi-para-vga-full-hd-1080p-com-audio-p2-adaptador-cabo-hdmi-macho-para-vga-plug-play-para-pc-notebook-monitor-projetor-tv-caixa-de-som-video-mais-audio-digital/p/MLB53430457#polycard_client=search-nordic&search_layout=stack&position=9&type=product&tracking_id=a0486da7-1744-4c47-8cb8-b0ad8780baaa&wid=MLB4088328829&sid=search",
-            },
-          ],
-        },
-        {
-          id: "m4",
-          name: "Diana Prince",
-          email: "diana@email.com",
-          handle: "@diana",
-          avatar: AVATAR_CATEGORIES.find((c) => c.id === "christmas")
-            ?.avatars[1],
-          wishlist: Array.from({ length: 3 }).map((_, i) => ({
-            id: `w-mock-${i}`,
-            name: `Presente Incrível ${i + 1}`,
-            description: `Descrição do presente ${i + 1} que a Diana quer muito ganhar.`,
-            price: (i + 1) * 10.0,
-            link: "https://www.mercadolivre.com.br/conversor-hdmi-para-vga-full-hd-1080p-com-audio-p2-adaptador-cabo-hdmi-macho-para-vga-plug-play-para-pc-notebook-monitor-projetor-tv-caixa-de-som-video-mais-audio-digital/p/MLB53430457#polycard_client=search-nordic&search_layout=stack&position=9&type=product&tracking_id=a0486da7-1744-4c47-8cb8-b0ad8780baaa&wid=MLB4088328829&sid=search",
-          })),
-        },
-        {
-          id: "m5",
-          userId: "1", // Link to the Admin User
-          name: "Admin User",
-          email: "admin@example.com",
-          handle: "@admin",
-          avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Santa",
-          wishlist: [],
-        },
-      ],
-      status: "created",
-      maxPrice: 150,
-      eventDate: "2025-12-23",
-    },
-  ],
+  groups: [],
   currentGroup: null,
+  isLoading: false,
 
-  createGroup: async (groupData) => {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+  fetchGroups: async () => {
+    set({ isLoading: true });
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
 
-    const newGroup: Group = {
-      ...groupData,
-      id: Math.random().toString(36).substr(2, 9),
-      participants: [],
-      status: "created",
-    };
+    // Fetch groups where I am owner OR member
+    // We also fetch the count of members for the list view
+    const { data, error } = await supabase
+      .from("groups")
+      .select("*, group_members(count)")
+      .order("created_at", { ascending: false });
 
-    set((state) => ({
-      groups: [...state.groups, newGroup],
-      currentGroup: newGroup,
+    if (error) {
+      console.error("Error fetching groups:", error);
+      set({ isLoading: false });
+      return;
+    }
+
+    // Map to Group type
+    const groups: Group[] = data.map((g) => ({
+      id: g.id,
+      name: g.name,
+      description: g.description,
+      ownerId: g.owner_id,
+      eventDate: g.event_date,
+      maxPrice: g.max_price,
+      status: g.status,
+      // Hack to make .length work without fetching all profiles
+      participants: new Array(g.group_members[0]?.count || 0).fill(
+        {} as Participant,
+      ),
     }));
 
-    return newGroup.id;
+    set({ groups, isLoading: false });
   },
 
-  getGroup: (id) => {
-    const group = get().groups.find((g) => g.id === id);
-    set({ currentGroup: group || null });
+  createGroup: async (groupData) => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("User not authenticated");
+
+    const { data, error } = await supabase
+      .from("groups")
+      .insert({
+        name: groupData.name,
+        description: groupData.description,
+        event_date: groupData.eventDate,
+        max_price: groupData.maxPrice,
+        owner_id: user.id,
+        status: "created",
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    // Add owner as admin member
+    await supabase.from("group_members").insert({
+      group_id: data.id,
+      user_id: user.id,
+      is_admin: true,
+    });
+
+    // Refresh list
+    get().fetchGroups();
+    return data.id;
+  },
+
+  getGroup: async (id) => {
+    set({ isLoading: true });
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    try {
+      // 1. Fetch Group Details
+      const { data: groupData, error: groupError } = await supabase
+        .from("groups")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (groupError) throw groupError;
+
+      // 2. Fetch Members
+      const { data: membersData, error: membersError } = await supabase
+        .from("group_members")
+        .select("id, user_id, is_admin")
+        .eq("group_id", id);
+
+      if (membersError) throw membersError;
+
+      // 3. Fetch Profiles and Wishlists manually to avoid relationship issues
+      const userIds = membersData.map((m) => m.user_id);
+
+      const [profilesResult, wishlistsResult] = await Promise.all([
+        supabase.from("profiles").select("*").in("id", userIds),
+        supabase.from("wishlist_items").select("*").in("user_id", userIds),
+      ]);
+
+      if (profilesResult.error) throw profilesResult.error;
+      // Wishlist error is non-critical, can ignore or log
+      if (wishlistsResult.error)
+        console.error("Error fetching wishlists:", wishlistsResult.error);
+
+      const profilesMap = new Map(profilesResult.data?.map((p) => [p.id, p]));
+      const wishlistsMap = new Map();
+      wishlistsResult.data?.forEach((w) => {
+        if (!wishlistsMap.has(w.user_id)) wishlistsMap.set(w.user_id, []);
+        wishlistsMap.get(w.user_id).push(w);
+      });
+
+      // 4. Fetch My Draw (if exists)
+      let myMatchId: string | undefined;
+      if (user && groupData.status === "drawn") {
+        const { data: drawData } = await supabase
+          .from("draws")
+          .select("receiver_id")
+          .eq("group_id", id)
+          .eq("giver_id", user.id)
+          .single();
+
+        if (drawData) {
+          myMatchId = drawData.receiver_id;
+        }
+      }
+
+      // 5. Map to Participant Type
+      const participants: Participant[] = membersData.map((m) => {
+        const profile = profilesMap.get(m.user_id);
+        const wishlist = wishlistsMap.get(m.user_id) || [];
+
+        // Fallback if profile not found (shouldn't happen usually)
+        if (!profile) {
+          return {
+            id: m.id,
+            userId: m.user_id,
+            name: "Usuário Desconhecido",
+            email: "",
+            handle: "",
+            avatar: "",
+            wishlist: [],
+            // isAdmin: m.is_admin // Type definition might not have it yet, but we can add it
+          } as Participant;
+        }
+
+        return {
+          id: m.id, // group_member id
+          userId: profile.id,
+          name: profile.name,
+          email: profile.email,
+          handle: profile.handle,
+          avatar: profile.avatar,
+          frame: profile.frame,
+          wishlist: wishlist.map((w: WishlistItem) => ({
+            id: w.id,
+            name: w.name,
+            description: w.description,
+            price: w.price,
+            link: w.link,
+          })),
+          // isAdmin: m.is_admin,
+        };
+      });
+
+      // 6. Link the draw match
+      if (myMatchId) {
+        const myParticipantIndex = participants.findIndex(
+          (p) => p.userId === user?.id,
+        );
+        const receiverParticipant = participants.find(
+          (p) => p.userId === myMatchId,
+        );
+
+        if (myParticipantIndex !== -1 && receiverParticipant) {
+          participants[myParticipantIndex].assignedToId =
+            receiverParticipant.id;
+        }
+      }
+
+      const currentGroup: Group = {
+        id: groupData.id,
+        name: groupData.name,
+        description: groupData.description,
+        ownerId: groupData.owner_id,
+        eventDate: groupData.event_date,
+        maxPrice: groupData.max_price,
+        status: groupData.status,
+        participants,
+      };
+
+      set({ currentGroup, isLoading: false });
+    } catch (error) {
+      console.error("Error in getGroup:", error);
+      set({ isLoading: false });
+    }
+  },
+
+  inviteUser: async (groupId, identifier) => {
+    const {
+      data: { user: currentUser },
+    } = await supabase.auth.getUser();
+    if (!currentUser) throw new Error("User not authenticated");
+
+    // 1. Find User
+    let searchHandle = identifier;
+    if (!identifier.includes("@")) {
+      searchHandle = `@${identifier}`;
+    }
+
+    // Search by email (exact or ilike) or handle (ilike)
+    // We use .or() with ilike for handle. Email usually exact but ilike is safer for user input.
+    const { data: profile, error } = await supabase
+      .from("profiles")
+      .select("id, name, email")
+      .or(
+        `email.ilike.${identifier},handle.ilike.${searchHandle},handle.ilike.${identifier}`,
+      )
+      .maybeSingle(); // Use maybeSingle to avoid 406 error if not found
+
+    if (error) console.error(error);
+    if (!profile) throw new Error("Usuário não encontrado.");
+
+    // 2. Check if already member
+    const { data: existing } = await supabase
+      .from("group_members")
+      .select("id")
+      .eq("group_id", groupId)
+      .eq("user_id", profile.id)
+      .maybeSingle();
+
+    if (existing) throw new Error("Usuário já está no grupo.");
+
+    // 3. Get Group Name for message
+    const { data: group } = await supabase
+      .from("groups")
+      .select("name")
+      .eq("id", groupId)
+      .single();
+
+    // 4. Send Notification
+    const { error: notifError } = await supabase.from("notifications").insert({
+      user_id: profile.id,
+      type: "invite",
+      title: "Convite para Grupo",
+      message: `Você foi convidado para participar do grupo "${group?.name || "Amigo Secreto"}".`,
+      data: { groupId, groupName: group?.name },
+    });
+
+    if (notifError) throw notifError;
   },
 
   addParticipant: async (groupId, participantData) => {
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    // This is now used when ACCEPTING an invite (or direct add if we kept it)
+    // participantData might just need userId now if we have it.
+    // But let's keep compatibility or update it.
+    // If we accept invite, we know the userId.
 
-    set((state) => {
-      const groups = state.groups.map((g) => {
-        if (g.id === groupId) {
-          const newParticipant: Participant = {
-            ...participantData,
-            id: Math.random().toString(36).substr(2, 9),
-            wishlist: [],
-          };
-          return { ...g, participants: [...g.participants, newParticipant] };
-        }
-        return g;
-      });
+    let userIdToAdd = participantData.userId;
 
-      const currentGroup = groups.find((g) => g.id === groupId) || null;
-      return { groups, currentGroup };
+    if (!userIdToAdd) {
+      // Fallback to search if userId not provided (legacy direct add)
+      const identifier = participantData.email || participantData.handle;
+      if (!identifier) throw new Error("Email or Handle required");
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("id")
+        .or(`email.eq.${identifier},handle.eq.${identifier}`)
+        .single();
+
+      if (profile) userIdToAdd = profile.id;
+      else throw new Error("Usuário não encontrado.");
+    }
+
+    // Check if already in group
+    const { data: existing } = await supabase
+      .from("group_members")
+      .select("id")
+      .eq("group_id", groupId)
+      .eq("user_id", userIdToAdd)
+      .maybeSingle();
+
+    if (existing) throw new Error("Usuário já está no grupo.");
+
+    // Add to group_members
+    const { error } = await supabase.from("group_members").insert({
+      group_id: groupId,
+      user_id: userIdToAdd,
     });
+
+    if (error) throw error;
+
+    // Refresh group
+    get().getGroup(groupId);
   },
 
   removeParticipant: async (groupId, participantId) => {
-    set((state) => {
-      const groups = state.groups.map((g) => {
-        if (g.id === groupId) {
-          return {
-            ...g,
-            participants: g.participants.filter((p) => p.id !== participantId),
-          };
-        }
-        return g;
-      });
+    // Notify user
+    const { data: member } = await supabase
+      .from("group_members")
+      .select("user_id, groups(name)")
+      .eq("id", participantId)
+      .single();
 
-      const currentGroup = groups.find((g) => g.id === groupId) || null;
-      return { groups, currentGroup };
-    });
+    if (member) {
+      await supabase.from("notifications").insert({
+        user_id: member.user_id,
+        type: "warning",
+        title: "Removido do Grupo",
+         message: `Você foi removido do grupo "${(member.groups as unknown as { name: string }[])?.[0]?.name || "Amigo Secreto"}".`,
+      });
+    }
+
+    const { error } = await supabase
+      .from("group_members")
+      .delete()
+      .eq("id", participantId);
+
+    if (error) throw error;
+
+    get().getGroup(groupId);
   },
 
-  updateParticipant: async (groupId, participantId, data) => {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    set((state) => ({
-      groups: state.groups.map((g) => {
-        if (g.id !== groupId) return g;
-        return {
-          ...g,
-          participants: g.participants.map((p) => {
-            if (p.id !== participantId) return p;
-            return { ...p, ...data };
-          }),
-        };
-      }),
-    }));
+  updateParticipant: async (groupId, _participantId, _data) => {
+    // This is mostly for local state updates in the mock.
+    // In real app, profile updates are done via useAuthStore.
+    // But if we have group-specific data (like gift ideas?), we would update here.
+    // For now, we just refresh the group.
+    console.log("Update participant pending:", _participantId, _data);
+    get().getGroup(groupId);
   },
 
   draw: async (groupId) => {
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    const { currentGroup } = get();
+    if (!currentGroup) return;
 
-    set((state) => {
-      const groups = state.groups.map((g) => {
-        if (g.id === groupId) {
-          // Simple shuffle and assign logic
-          const participants = [...g.participants];
-          let shuffled = [...participants];
+    // 1. Get all members (profiles)
+    // We need the user_ids to create the pairs
+    const participants = currentGroup.participants;
+    if (participants.length < 3) throw new Error("Mínimo de 3 participantes.");
 
-          // Ensure no one draws themselves
-          let valid = false;
-          while (!valid) {
-            shuffled = shuffled.sort(() => Math.random() - 0.5);
-            valid = participants.every((p, i) => p.id !== shuffled[i].id);
-          }
+    const userIds = participants.map((p) => p.userId!).filter(Boolean);
 
-          const updatedParticipants = participants.map((p, i) => ({
-            ...p,
-            assignedToId: shuffled[i].id,
-          }));
+    // 2. Shuffle
+    let shuffled = [...userIds];
+    let valid = false;
+    // Simple derangement shuffle
+    while (!valid) {
+      shuffled = shuffled.sort(() => Math.random() - 0.5);
+      valid = userIds.every((id, i) => id !== shuffled[i]);
+    }
 
-          return {
-            ...g,
-            participants: updatedParticipants,
-            status: "drawn" as const,
-          };
-        }
-        return g;
-      });
+    // 3. Prepare inserts
+    const draws = userIds.map((giverId, i) => ({
+      group_id: groupId,
+      giver_id: giverId,
+      receiver_id: shuffled[i],
+    }));
 
-      const currentGroup = groups.find((g) => g.id === groupId) || null;
-      return { groups, currentGroup };
-    });
+    // 4. Transaction-like (Supabase doesn't have transactions in client, but we can do sequential)
+    // Ideally use an RPC, but here we go:
+
+    // Clear old draws (if any) - RLS allows owner to delete
+    await supabase.from("draws").delete().eq("group_id", groupId);
+
+    // Insert new draws
+    const { error: drawError } = await supabase.from("draws").insert(draws);
+    if (drawError) throw drawError;
+
+    // Update group status
+    const { error: updateError } = await supabase
+      .from("groups")
+      .update({ status: "drawn" })
+      .eq("id", groupId);
+
+    if (updateError) throw updateError;
+
+    // Refresh
+    get().getGroup(groupId);
   },
+
+  transferOwnership: async (groupId, newOwnerId) => {
+    const { currentGroup } = get();
+    if (!currentGroup) return;
+
+    // 0. VALIDATION: Check if the new owner is still a member
+    const { data: memberCheck, error: memberCheckError } = await supabase
+      .from("group_members")
+      .select("id")
+      .eq("group_id", groupId)
+      .eq("user_id", newOwnerId)
+      .single();
+
+    if (memberCheckError || !memberCheck) {
+      throw new Error(
+        "Este usuário não é mais membro do grupo. A lista de participantes pode estar desatualizada.",
+      );
+    }
+
+    // 1. Update Admin Flags (Swap) - Do this FIRST while we are still owner
+    await Promise.all([
+      supabase
+        .from("group_members")
+        .update({ is_admin: false })
+        .eq("group_id", groupId)
+        .eq("user_id", currentGroup.ownerId),
+      supabase
+        .from("group_members")
+        .update({ is_admin: true })
+        .eq("group_id", groupId)
+        .eq("user_id", newOwnerId),
+    ]);
+
+    // 2. Update Group Owner - Do this LAST
+    const { error: groupError } = await supabase
+      .from("groups")
+      .update({ owner_id: newOwnerId })
+      .eq("id", groupId);
+
+    if (groupError) throw groupError;
+
+    // 3. Notify new owner
+    await supabase.from("notifications").insert({
+      user_id: newOwnerId,
+      type: "info",
+      title: "Você é o novo Admin!",
+      message: `Você agora é o administrador do grupo "${currentGroup.name}".`,
+    });
+
+    // Refresh
+    get().getGroup(groupId);
+  },
+
   deleteGroup: async (groupId) => {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    // Notify members
+    const { data: group } = await supabase
+      .from("groups")
+      .select("name, owner_id")
+      .eq("id", groupId)
+      .single();
+    const { data: members } = await supabase
+      .from("group_members")
+      .select("user_id")
+      .eq("group_id", groupId);
+
+    if (group && members) {
+      const notifications = members
+        .filter((m) => m.user_id !== group.owner_id)
+        .map((m) => ({
+          user_id: m.user_id,
+          type: "warning",
+          title: "Grupo Excluído",
+          message: `O grupo "${group.name}" foi excluído pelo administrador.`,
+          read: false,
+        }));
+
+      if (notifications.length > 0) {
+        await supabase.from("notifications").insert(notifications);
+      }
+    }
+
+    const { error } = await supabase.from("groups").delete().eq("id", groupId);
+    if (error) throw error;
+
     set((state) => ({
       groups: state.groups.filter((g) => g.id !== groupId),
-      currentGroup:
-        state.currentGroup?.id === groupId ? null : state.currentGroup,
+      currentGroup: null,
     }));
+  },
+
+  leaveGroup: async (groupId) => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { error } = await supabase
+      .from("group_members")
+      .delete()
+      .eq("group_id", groupId)
+      .eq("user_id", user.id);
+
+    if (error) throw error;
+
+    set((state) => ({
+      groups: state.groups.filter((g) => g.id !== groupId),
+      currentGroup: null,
+    }));
+  },
+
+  createInvite: async (groupId) => {
+    // Check if existing valid invite
+    const { data: existing } = await supabase
+      .from("group_invites")
+      .select("code")
+      .eq("group_id", groupId)
+      .maybeSingle();
+
+    if (existing) return existing.code;
+
+    // Create new
+    const code = Math.random().toString(36).substring(2, 10); // Simple random code
+    const { data, error } = await supabase
+      .from("group_invites")
+      .insert({
+        group_id: groupId,
+        code,
+      })
+      .select("code")
+      .single();
+
+    if (error) throw error;
+    return data.code;
+  },
+
+  getInviteInfo: async (code) => {
+    const { data, error } = await supabase
+      .from("group_invites")
+      .select("groups(name, profiles!groups_owner_id_fkey(name))")
+      .eq("code", code)
+      .single();
+
+    if (error || !data) throw new Error("Convite inválido ou expirado.");
+
+    // Type assertion because of nested join
+    const group = data.groups as unknown as {
+      name: string;
+      profiles: { name: string };
+    };
+    // Note: profiles!groups_owner_id_fkey is the explicit join for owner
+    return {
+      groupName: group.name,
+      ownerName: group.profiles?.name || "Alguém",
+    };
+  },
+
+  joinByInvite: async (code) => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("Você precisa estar logado.");
+
+    // 1. Get invite info
+    const { data: invite, error } = await supabase
+      .from("group_invites")
+      .select("group_id")
+      .eq("code", code)
+      .single();
+
+    if (error || !invite) throw new Error("Convite inválido.");
+
+    // 2. Check if already member
+    const { data: existing } = await supabase
+      .from("group_members")
+      .select("id")
+      .eq("group_id", invite.group_id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (existing) return invite.group_id; // Already joined, just return ID
+
+    // 3. Join
+    const { error: joinError } = await supabase.from("group_members").insert({
+      group_id: invite.group_id,
+      user_id: user.id,
+    });
+
+    if (joinError) throw joinError;
+
+    // Refresh list
+    get().fetchGroups();
+
+    return invite.group_id;
   },
 }));

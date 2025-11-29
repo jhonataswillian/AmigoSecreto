@@ -93,7 +93,7 @@ export const FRAMES: Frame[] = [
   },
   {
     id: "wreath-animated",
-    name: "Guirlanda CSS",
+    name: "Magia Natalina",
     class: "",
   },
 
