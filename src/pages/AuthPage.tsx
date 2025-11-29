@@ -212,19 +212,7 @@ export const AuthPage: React.FC = () => {
     }
   };
 
-  const handleAdminLogin = async () => {
-    try {
-      setIsLoading(true);
-      await login("admin", "admin");
-      navigate("/groups");
-    } catch (error) {
-      // error is unused but we need to catch it
-      console.error(error);
-      setLoginError("Erro ao acessar como admin.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+
 
   const handleModeChange = (newMode: "login" | "register") => {
     setMode(newMode);
@@ -303,7 +291,7 @@ export const AuthPage: React.FC = () => {
                   exit={{ opacity: 0, x: 20 }}
                   transition={{ duration: 0.3 }}
                   onSubmit={handleSubmitLogin(onLoginSubmit)}
-                  className="space-y-6"
+                  className="flex flex-col min-h-[300px] space-y-6"
                 >
                   {loginError && (
                     <div className="p-3 rounded-lg bg-red-50 border border-red-100 text-red-600 text-sm font-medium">
@@ -363,32 +351,11 @@ export const AuthPage: React.FC = () => {
 
                   <Button
                     type="submit"
-                    className="w-full bg-christmas-wine hover:bg-christmas-wine-light text-white shadow-lg shadow-christmas-wine/20 py-6 text-base"
+                    className="w-full bg-christmas-wine hover:bg-christmas-wine-light text-white shadow-lg shadow-christmas-wine/20 py-6 text-base mt-auto"
                     size="lg"
                     isLoading={isLoading}
                   >
                     Entrar
-                  </Button>
-
-                  <div className="relative py-4">
-                    <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t border-gray-200" />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-white px-3 text-gray-400 font-medium">
-                        Ou
-                      </span>
-                    </div>
-                  </div>
-
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full text-xs border-dashed border-gray-300 text-gray-500 hover:text-christmas-wine hover:border-christmas-wine/30 hover:bg-christmas-wine/5"
-                    onClick={handleAdminLogin}
-                    disabled={isLoading}
-                  >
-                    Acessar como Admin (Demo)
                   </Button>
                 </motion.form>
               ) : (

@@ -452,7 +452,7 @@ export const GroupDashboardPage: React.FC = () => {
           <Button
             size="lg"
             className="w-full max-w-md shadow-xl"
-            disabled={currentGroup.participants.length < 3}
+            disabled={currentGroup.participants.length < 2}
             onClick={handleDraw}
             isLoading={isDrawing}
           >
