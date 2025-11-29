@@ -50,6 +50,8 @@ Built with a modern, type-safe, and performance-oriented stack:
 - **Core**: [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
 - **Build System**: [Vite](https://vitejs.dev/)
 - **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
+- **Backend & Database**: [Supabase](https://supabase.com/) (PostgreSQL + Auth)
+- **Security**: Row Level Security (RLS) Policies
 - **State Management**: [Zustand](https://github.com/pmndrs/zustand)
 - **Routing**: [React Router v7](https://reactrouter.com/)
 - **Validation**: [Zod](https://zod.dev/) + [React Hook Form](https://react-hook-form.com/)
