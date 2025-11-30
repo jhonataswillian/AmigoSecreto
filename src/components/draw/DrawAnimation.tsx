@@ -174,7 +174,7 @@ export const DrawAnimation: React.FC<DrawAnimationProps> = ({
               {match.name}
             </h2>
             <p className="text-gray-500 mb-6 font-medium">
-              {match.handle || match.email}
+              {match.handle || "Convidado"}
             </p>
 
             <div className="space-y-3">

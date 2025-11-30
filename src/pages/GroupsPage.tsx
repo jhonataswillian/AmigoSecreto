@@ -18,14 +18,23 @@ const createGroupSchema = z.object({
   description: z.string().optional(),
   eventDate: z
     .string()
-    .min(1, "Data do evento é obrigatória")
+    .min(1, "Informe uma data válida")
     .refine((dateString) => {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const [year, month, day] = dateString.split("-").map(Number);
       const eventDate = new Date(year, month - 1, day);
+
+      if (
+        eventDate.getFullYear() !== year ||
+        eventDate.getMonth() !== month - 1 ||
+        eventDate.getDate() !== day
+      ) {
+        return false;
+      }
+
       return eventDate >= today;
-    }, "A data do evento deve ser hoje ou no futuro"),
+    }, "A data do evento não pode ser no passado"),
   maxPrice: z
     .string()
     .refine(
@@ -56,6 +65,8 @@ export const GroupsPage: React.FC = () => {
     handleSubmit,
     formState: { errors },
     reset,
+    setError,
+    clearErrors,
   } = useForm<CreateGroupForm>({
     resolver: zodResolver(createGroupSchema),
   });
@@ -153,7 +164,12 @@ export const GroupsPage: React.FC = () => {
                 <Calendar className="w-4 h-4" />
               </div>
               <span className="font-medium">
-                {new Date(group.eventDate).toLocaleDateString()}
+                {(() => {
+                  const date = new Date(group.eventDate);
+                  return isNaN(date.getTime())
+                    ? "Data Inválida"
+                    : date.toLocaleDateString();
+                })()}
               </span>
             </div>
           )}
@@ -279,7 +295,7 @@ export const GroupsPage: React.FC = () => {
             viewMode === "grid"
               ? "md:grid-cols-2 lg:grid-cols-3"
               : "grid-cols-1",
-          )}
+            )}
         >
           {filteredGroups.map((group) => (
             <GroupCard key={group.id} group={group} />
@@ -295,7 +311,7 @@ export const GroupsPage: React.FC = () => {
           Preencha as informações abaixo para criar um novo grupo de desejos.
         </div>
 
-        <form onSubmit={handleSubmit(onCreateGroup)} className="space-y-4">
+        <form onSubmit={handleSubmit(onCreateGroup)} className="space-y-4" noValidate>
           <Input
             label="Nome do Grupo"
             placeholder="Ex: Família Silva 2025"
@@ -323,7 +339,18 @@ export const GroupsPage: React.FC = () => {
               icon={<Calendar className="w-5 h-5" />}
               error={errors.eventDate?.message}
               min={new Date().toISOString().split("T")[0]}
-              {...register("eventDate")}
+              {...register("eventDate", {
+                onChange: (e) => {
+                  if (e.target.validity.badInput) {
+                    setError("eventDate", {
+                      type: "manual",
+                      message: "Data inexistente",
+                    });
+                  } else if (errors.eventDate?.type === "manual") {
+                    clearErrors("eventDate");
+                  }
+                },
+              })}
             />
 
             <Input

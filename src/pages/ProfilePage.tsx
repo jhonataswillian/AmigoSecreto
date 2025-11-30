@@ -6,7 +6,6 @@ import {
   Save,
   Edit2,
   Lock,
-  Mail,
   AtSign,
   Trash2,
   AlertTriangle,
@@ -316,20 +315,6 @@ export const ProfilePage: React.FC = () => {
         {activeTab === "security" && (
           <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
             <Card className="p-6 space-y-6 divide-y divide-gray-100">
-              {/* Email (Read-only) */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
-                  Email
-                </label>
-                <div className="flex items-center px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-500">
-                  <Mail className="w-5 h-5 mr-3 text-gray-400" />
-                  {user?.email}
-                </div>
-                <p className="text-xs text-gray-400">
-                  O email não pode ser alterado.
-                </p>
-              </div>
-
               {/* Handle */}
               <div className="pt-6 space-y-2">
                 <label className="text-sm font-medium text-gray-700">

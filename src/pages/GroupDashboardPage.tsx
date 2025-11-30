@@ -121,7 +121,7 @@ export const GroupDashboardPage: React.FC = () => {
 
   const myParticipant = React.useMemo(() => {
     return currentGroup?.participants.find(
-      (p) => p.userId === user?.id || p.email === user?.email,
+      (p) => p.userId === user?.id,
     );
   }, [currentGroup, user]);
 
@@ -134,8 +134,8 @@ export const GroupDashboardPage: React.FC = () => {
   const sortedParticipants = React.useMemo(() => {
     if (!currentGroup) return [];
     return [...currentGroup.participants].sort((a, b) => {
-      const isA = a.userId === user?.id || a.email === user?.email;
-      const isB = b.userId === user?.id || b.email === user?.email;
+      const isA = a.userId === user?.id;
+      const isB = b.userId === user?.id;
 
       if (isA && !isB) return -1;
       if (!isA && isB) return 1;
@@ -143,6 +143,7 @@ export const GroupDashboardPage: React.FC = () => {
       return a.name.localeCompare(b.name);
     });
   }, [currentGroup, user]);
+
 
   // Realtime Subscription
   React.useEffect(() => {
@@ -332,11 +333,16 @@ export const GroupDashboardPage: React.FC = () => {
         <Card className="p-4 flex flex-col items-center justify-center text-center space-y-2">
           <Calendar className="w-6 h-6 text-christmas-green" />
           <span className="text-sm font-medium">
-            {currentGroup.eventDate
-              ? format(new Date(currentGroup.eventDate), "dd 'de' MMMM", {
-                  locale: ptBR,
-                })
-              : "Data a definir"}
+          <span className="text-sm font-medium">
+            {(() => {
+              if (!currentGroup.eventDate) return "Data a definir";
+              const date = new Date(currentGroup.eventDate);
+              if (isNaN(date.getTime())) return "Data Inválida";
+              return format(date, "dd 'de' MMMM", {
+                locale: ptBR,
+              });
+            })()}
+          </span>
           </span>
         </Card>
         <Card className="p-4 flex flex-col items-center justify-center text-center space-y-2">
@@ -371,8 +377,7 @@ export const GroupDashboardPage: React.FC = () => {
             if (participant) {
               if (
                 isOwner &&
-                (participant.userId === user?.id ||
-                  participant.email === user?.email)
+                participant.userId === user?.id
               ) {
                 alert(
                   "O administrador não pode sair do grupo. Você deve deletar o grupo se quiser encerrá-lo.",
@@ -400,7 +405,7 @@ export const GroupDashboardPage: React.FC = () => {
               <p className="text-xs text-gray-500 font-medium">
                 {participant.handle
                   ? `@${participant.handle.replace(/^@/, "")}`
-                  : participant.email}
+                  : "Convidado"}
               </p>
             </div>
           )}
@@ -730,7 +735,7 @@ export const GroupDashboardPage: React.FC = () => {
                       {p.name}
                     </p>
                     <p className="text-xs text-gray-500 truncate">
-                      {p.handle || p.email}
+                      {p.handle || "Convidado"}
                     </p>
                   </div>
                   {selectedNewAdmin?.id === p.id && (
