@@ -190,27 +190,7 @@ export const GroupDashboardPage: React.FC = () => {
       setIsInviteModalOpen(false);
     } catch (error: unknown) {
       console.error(error);
-      const msg = (error as Error).message || "Erro ao enviar convite.";
-
-      if (msg.includes("já está no grupo")) {
-        addToast({
-          type: "error",
-          title: "Já participa",
-          message: "Este usuário já está no grupo.",
-        });
-      } else if (msg.includes("não encontrado")) {
-        addToast({
-          type: "error",
-          title: "Não encontrado",
-          message: "Usuário não encontrado. Verifique o email ou handle.",
-        });
-      } else {
-        addToast({
-          type: "error",
-          title: "Erro",
-          message: msg,
-        });
-      }
+      throw error;
     }
   };
 

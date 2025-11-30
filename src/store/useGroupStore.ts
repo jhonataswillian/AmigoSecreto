@@ -30,7 +30,7 @@ interface GroupState {
   createInvite: (groupId: string) => Promise<string>;
   getInviteInfo: (
     code: string,
-  ) => Promise<{ groupName: string; ownerName: string }>;
+  ) => Promise<{ groupName: string; ownerName: string; ownerHandle: string }>;
   joinByInvite: (code: string) => Promise<string>;
 }
 
@@ -246,19 +246,19 @@ export const useGroupStore = create<GroupState>((set, get) => ({
 
     // 1. Find User
     // We only search by handle now
-    let searchHandle = identifier;
-    if (!identifier.startsWith("@")) {
-      searchHandle = `@${identifier}`;
+    let searchHandle = identifier.trim();
+    if (!searchHandle.startsWith("@")) {
+      searchHandle = `@${searchHandle}`;
     }
 
     const { data: profile, error } = await supabase
       .from("profiles")
-      .select("id, name, email")
+      .select("id, name")
       .ilike("handle", searchHandle)
       .maybeSingle();
 
     if (error) console.error(error);
-    if (!profile) throw new Error("Usuário não encontrado.");
+    if (!profile) throw new Error(`Usuário "${searchHandle}" não encontrado. Verifique o @handle.`);
 
     // 2. Check if already member
     const { data: existing } = await supabase
@@ -377,7 +377,7 @@ export const useGroupStore = create<GroupState>((set, get) => ({
     // 1. Get all members (profiles)
     // We need the user_ids to create the pairs
     const participants = currentGroup.participants;
-    if (participants.length < 3) throw new Error("Mínimo de 3 participantes.");
+    if (participants.length < 2) throw new Error("Mínimo de 2 participantes.");
 
     const userIds = participants.map((p) => p.userId!).filter(Boolean);
 
@@ -556,7 +556,7 @@ export const useGroupStore = create<GroupState>((set, get) => ({
   getInviteInfo: async (code) => {
     const { data, error } = await supabase
       .from("group_invites")
-      .select("groups(name, profiles!groups_owner_id_fkey(name))")
+      .select("groups(name, profiles!groups_owner_id_fkey(name, handle))")
       .eq("code", code)
       .single();
 
@@ -565,12 +565,13 @@ export const useGroupStore = create<GroupState>((set, get) => ({
     // Type assertion because of nested join
     const group = data.groups as unknown as {
       name: string;
-      profiles: { name: string };
+      profiles: { name: string; handle: string };
     };
     // Note: profiles!groups_owner_id_fkey is the explicit join for owner
     return {
       groupName: group.name,
       ownerName: group.profiles?.name || "Alguém",
+      ownerHandle: group.profiles?.handle || "",
     };
   },
 

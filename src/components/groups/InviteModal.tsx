@@ -27,6 +27,8 @@ export const InviteModal: React.FC<InviteModalProps> = ({
   const [isLoading, setIsLoading] = React.useState(false);
   const [inviteLink, setInviteLink] = React.useState("");
 
+  const [error, setError] = React.useState("");
+
   React.useEffect(() => {
     if (isOpen && groupId) {
       createInvite(groupId).then((code) => {
@@ -46,12 +48,18 @@ export const InviteModal: React.FC<InviteModalProps> = ({
     if (!value) return;
 
     setIsLoading(true);
+    setError("");
     try {
       await onInvite(value);
       setValue("");
       onClose();
     } catch (error) {
       console.error(error);
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("Erro ao enviar convite.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -104,7 +112,11 @@ export const InviteModal: React.FC<InviteModalProps> = ({
             type="text"
             icon={<span className="font-bold text-lg text-gray-400">@</span>}
             value={value}
-            onChange={(e) => setValue(e.target.value)}
+            onChange={(e) => {
+              setValue(e.target.value);
+              setError("");
+            }}
+            error={error}
           />
           <Button
             type="submit"

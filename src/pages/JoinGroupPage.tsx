@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useGroupStore } from "../store/useGroupStore";
 import { useAuthStore } from "../store/useAuthStore";
 import { Button } from "../components/ui/Button";
-import { Gift, User, ArrowRight, AlertCircle } from "lucide-react";
+import { Gift, ArrowRight, AlertCircle } from "lucide-react";
 import { Card } from "../components/ui/Card";
 
 export const JoinGroupPage: React.FC = () => {
@@ -18,6 +18,7 @@ export const JoinGroupPage: React.FC = () => {
   const [inviteInfo, setInviteInfo] = useState<{
     groupName: string;
     ownerName: string;
+    ownerHandle: string;
   } | null>(null);
 
   useEffect(() => {
@@ -103,20 +104,20 @@ export const JoinGroupPage: React.FC = () => {
         </div>
 
         <div className="bg-christmas-wine/5 rounded-2xl p-6 space-y-4 border border-christmas-wine/10">
-          <div className="text-center">
-            <p className="text-sm text-gray-500 uppercase tracking-wider font-bold mb-1">
-              Grupo
+          <div className="text-center space-y-2">
+            <p className="text-lg text-gray-700">
+              Deseja aceitar o convite de{" "}
+              <strong className="text-christmas-wine">
+                @{inviteInfo?.ownerHandle?.replace("@", "")}
+              </strong>
             </p>
-            <p className="text-2xl font-bold text-gray-900">
-              {inviteInfo?.groupName}
+            <p className="text-lg text-gray-700">
+              e entrar no grupo{" "}
+              <strong className="text-christmas-wine">
+                {inviteInfo?.groupName}
+              </strong>
+              ?
             </p>
-          </div>
-
-          <div className="flex items-center justify-center gap-2 text-sm text-gray-600 bg-white/50 py-2 rounded-lg">
-            <User className="w-4 h-4" />
-            <span>
-              Organizado por <strong>{inviteInfo?.ownerName}</strong>
-            </span>
           </div>
         </div>
 
