@@ -174,14 +174,14 @@ export const MyWishlistPage: React.FC = () => {
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleOpenModal(item)}
-                      className="p-2 text-gray-400 hover:text-christmas-wine hover:bg-christmas-wine/10 rounded-full transition-colors"
+                      className="p-2 text-christmas-wine bg-christmas-wine/5 rounded-full hover:bg-christmas-wine/20 transition-colors"
                       title="Editar item"
                     >
                       <Edit2 className="w-5 h-5" />
                     </button>
                     <button
                       onClick={() => confirmDelete(item.id)}
-                      className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                      className="p-2 text-red-500 bg-red-50 rounded-full hover:bg-red-100 transition-colors"
                       title="Remover item"
                     >
                       <Trash2 className="w-5 h-5" />

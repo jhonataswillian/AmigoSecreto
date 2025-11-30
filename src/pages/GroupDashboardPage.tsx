@@ -373,16 +373,16 @@ export const GroupDashboardPage: React.FC = () => {
           }
         >
           {(participant) => (
-            <div>
+            <div className="min-w-0">
               <p className="font-bold text-gray-900 flex items-center gap-2">
-                {participant.name}
+                <span className="truncate">{participant.name}</span>
                 {participant.userId === currentGroup.ownerId && (
-                  <span className="text-yellow-500" title="Admin">
+                  <span className="text-yellow-500 shrink-0" title="Admin">
                     <Crown className="w-4 h-4 fill-current" />
                   </span>
                 )}
               </p>
-              <p className="text-xs text-gray-500 font-medium">
+              <p className="text-xs text-gray-500 font-medium truncate">
                 {participant.handle
                   ? `@${participant.handle.replace(/^@/, "")}`
                   : "Convidado"}

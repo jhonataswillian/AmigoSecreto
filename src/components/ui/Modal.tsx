@@ -111,7 +111,9 @@ export const Modal: React.FC<ModalProps> = ({
               </div>
 
               {/* Content */}
-              <div className="p-6 pt-2 relative z-10">{children}</div>
+              <div className="p-6 pt-2 relative z-10 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                {children}
+              </div>
             </motion.div>
           </div>
         </>

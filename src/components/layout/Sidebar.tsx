@@ -1,6 +1,6 @@
 import React from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import { Home, Gift, Bell, User, LogOut, X } from "lucide-react";
+import { Home, Gift, Bell, User, LogOut, X, Github, Linkedin } from "lucide-react";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useNotificationStore } from "../../store/useNotificationStore";
 import { clsx } from "clsx";
@@ -146,8 +146,38 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             })}
           </nav>
 
+          {/* Developer Credits */}
+          <div className="px-4 py-4 text-center">
+            <p className="text-[10px] text-white/40 mb-2 font-medium tracking-wide uppercase">
+              Desenvolvido com <span className="text-red-400 animate-pulse">❤</span> por
+            </p>
+            <p className="text-xs text-white/60 font-medium mb-3">
+              Jhonatas Willian
+            </p>
+            <div className="flex justify-center gap-4">
+              <a
+                href="https://github.com/jhonataswillian"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white/40 hover:text-white transition-colors"
+                title="GitHub"
+              >
+                <Github className="w-4 h-4" />
+              </a>
+              <a
+                href="https://linkedin.com/in/jhonataswillian"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white/40 hover:text-blue-400 transition-colors"
+                title="LinkedIn"
+              >
+                <Linkedin className="w-4 h-4" />
+              </a>
+            </div>
+          </div>
+
           {/* Footer / Logout */}
-          <div className="mt-auto pt-6 border-t border-white/10">
+          <div className="pt-4 border-t border-white/10">
             <button
               onClick={handleLogout}
               className="flex items-center gap-3 px-4 py-3 w-full text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200"

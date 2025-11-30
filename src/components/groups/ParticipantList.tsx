@@ -35,10 +35,10 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({
       {participants.map((participant) => (
         <Card
           key={participant.id}
-          className="p-4 flex items-center justify-between"
+          className="p-4 flex flex-col lg:flex-row items-center lg:justify-between gap-3 lg:gap-0"
         >
-          <div className="flex items-center space-x-3">
-            <div className="relative w-[3.3rem] h-[3.3rem]">
+          <div className="flex items-center space-x-3 min-w-0 w-full lg:w-auto flex-1">
+            <div className="relative w-[3.3rem] h-[3.3rem] shrink-0">
               <div
                 className={clsx(
                   "w-full h-full rounded-full overflow-hidden bg-gray-100",
@@ -59,25 +59,23 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({
               </div>
               {participant.frame && <FrameRenderer frame={participant.frame} />}
             </div>
-            <div>
+            <div className="min-w-0 flex-1">
               {children ? (
                 children(participant)
               ) : (
                 <>
-                  <h4 className="font-medium text-gray-900">
+                  <h4 className="font-medium text-gray-900 truncate">
                     {participant.name}
                   </h4>
-                  <p className="text-xs text-gray-500">
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-500 truncate">
                     {participant.handle || "Convidado"}
-                  </p>
                   </p>
                 </>
               )}
             </div>
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center justify-end w-full lg:w-auto space-x-2">
             <Button
               variant="ghost"
               size="sm"

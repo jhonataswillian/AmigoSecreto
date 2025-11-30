@@ -106,7 +106,7 @@ export const AvatarEditor: React.FC<AvatarEditorProps> = ({
               </div>
 
               {/* Avatars Grid */}
-              <div className="grid grid-cols-5 gap-3 max-h-[250px] overflow-y-auto p-1">
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 max-h-[40vh] overflow-y-auto p-1">
                 {AVATAR_CATEGORIES.find(
                   (c) => c.id === activeCategory,
                 )?.avatars.map((avatar) => (
@@ -130,7 +130,7 @@ export const AvatarEditor: React.FC<AvatarEditorProps> = ({
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-3 gap-3 max-h-[300px] overflow-y-auto p-1">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[40vh] overflow-y-auto p-1">
               {FRAMES.map((frame) => (
                 <button
                   key={frame.id}

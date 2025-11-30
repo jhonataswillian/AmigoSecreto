@@ -10,6 +10,7 @@ import { JoinGroupPage } from "./pages/JoinGroupPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { MyWishlistPage } from "./pages/MyWishlistPage";
 import { NotificationsPage } from "./pages/NotificationsPage";
+import { ErrorPage } from "./pages/ErrorPage";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { AutoLogout } from "./components/auth/AutoLogout";
 import { useAuthStore } from "./store/useAuthStore";
@@ -52,6 +53,14 @@ function App() {
           <Route path="/login" element={<AuthPage />} />
           <Route path="/invite/:code" element={<JoinGroupPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+
+          {/* Error Pages */}
+          <Route path="/400" element={<ErrorPage code={400} />} />
+          <Route path="/401" element={<ErrorPage code={401} />} />
+          <Route path="/403" element={<ErrorPage code={403} />} />
+          <Route path="/404" element={<ErrorPage code={404} />} />
+          <Route path="/500" element={<ErrorPage code={500} />} />
+          <Route path="*" element={<ErrorPage code={404} />} />
 
           <Route
             path="/"
