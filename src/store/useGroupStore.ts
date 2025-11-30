@@ -180,7 +180,6 @@ export const useGroupStore = create<GroupState>((set, get) => ({
             id: m.id,
             userId: m.user_id,
             name: "Usuário Desconhecido",
-            email: "",
             handle: "",
             avatar: "",
             wishlist: [],
@@ -192,7 +191,6 @@ export const useGroupStore = create<GroupState>((set, get) => ({
           id: m.id, // group_member id
           userId: profile.id,
           name: profile.name,
-          email: profile.email,
           handle: profile.handle,
           avatar: profile.avatar,
           frame: profile.frame,
@@ -247,20 +245,17 @@ export const useGroupStore = create<GroupState>((set, get) => ({
     if (!currentUser) throw new Error("User not authenticated");
 
     // 1. Find User
+    // We only search by handle now
     let searchHandle = identifier;
-    if (!identifier.includes("@")) {
+    if (!identifier.startsWith("@")) {
       searchHandle = `@${identifier}`;
     }
 
-    // Search by email (exact or ilike) or handle (ilike)
-    // We use .or() with ilike for handle. Email usually exact but ilike is safer for user input.
     const { data: profile, error } = await supabase
       .from("profiles")
       .select("id, name, email")
-      .or(
-        `email.ilike.${identifier},handle.ilike.${searchHandle},handle.ilike.${identifier}`,
-      )
-      .maybeSingle(); // Use maybeSingle to avoid 406 error if not found
+      .ilike("handle", searchHandle)
+      .maybeSingle();
 
     if (error) console.error(error);
     if (!profile) throw new Error("Usuário não encontrado.");
@@ -304,13 +299,13 @@ export const useGroupStore = create<GroupState>((set, get) => ({
 
     if (!userIdToAdd) {
       // Fallback to search if userId not provided (legacy direct add)
-      const identifier = participantData.email || participantData.handle;
-      if (!identifier) throw new Error("Email or Handle required");
+      const identifier = participantData.handle;
+      if (!identifier) throw new Error("Handle required");
 
       const { data: profile } = await supabase
         .from("profiles")
         .select("id")
-        .or(`email.eq.${identifier},handle.eq.${identifier}`)
+        .eq("handle", identifier)
         .single();
 
       if (profile) userIdToAdd = profile.id;

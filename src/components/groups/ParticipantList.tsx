@@ -68,7 +68,9 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({
                     {participant.name}
                   </h4>
                   <p className="text-xs text-gray-500">
-                    {participant.handle || participant.email || "Convidado"}
+                  <p className="text-xs text-gray-500">
+                    {participant.handle || "Convidado"}
+                  </p>
                   </p>
                 </>
               )}

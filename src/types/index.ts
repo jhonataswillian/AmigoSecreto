@@ -4,7 +4,6 @@
 export interface User {
   id: string;
   name: string;
-  email: string;
   avatar?: string;
   frame?: Frame;
   handle: string;
@@ -38,7 +37,6 @@ export interface Participant {
   id: string;
   userId?: string; // Link to User if registered
   name: string;
-  email?: string;
   handle?: string;
   avatar?: string;
   frame?: Frame;
