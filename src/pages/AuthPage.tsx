@@ -212,8 +212,6 @@ export const AuthPage: React.FC = () => {
     }
   };
 
-
-
   const handleModeChange = (newMode: "login" | "register") => {
     setMode(newMode);
     window.history.pushState(null, "", `/${newMode}`);

@@ -120,9 +120,7 @@ export const GroupDashboardPage: React.FC = () => {
   };
 
   const myParticipant = React.useMemo(() => {
-    return currentGroup?.participants.find(
-      (p) => p.userId === user?.id,
-    );
+    return currentGroup?.participants.find((p) => p.userId === user?.id);
   }, [currentGroup, user]);
 
   const myMatch = React.useMemo(() => {
@@ -143,7 +141,6 @@ export const GroupDashboardPage: React.FC = () => {
       return a.name.localeCompare(b.name);
     });
   }, [currentGroup, user]);
-
 
   // Realtime Subscription
   React.useEffect(() => {
@@ -313,16 +310,16 @@ export const GroupDashboardPage: React.FC = () => {
         <Card className="p-4 flex flex-col items-center justify-center text-center space-y-2">
           <Calendar className="w-6 h-6 text-christmas-green" />
           <span className="text-sm font-medium">
-          <span className="text-sm font-medium">
-            {(() => {
-              if (!currentGroup.eventDate) return "Data a definir";
-              const date = new Date(currentGroup.eventDate);
-              if (isNaN(date.getTime())) return "Data Inválida";
-              return format(date, "dd 'de' MMMM", {
-                locale: ptBR,
-              });
-            })()}
-          </span>
+            <span className="text-sm font-medium">
+              {(() => {
+                if (!currentGroup.eventDate) return "Data a definir";
+                const date = new Date(currentGroup.eventDate);
+                if (isNaN(date.getTime())) return "Data Inválida";
+                return format(date, "dd 'de' MMMM", {
+                  locale: ptBR,
+                });
+              })()}
+            </span>
           </span>
         </Card>
         <Card className="p-4 flex flex-col items-center justify-center text-center space-y-2">
@@ -355,10 +352,7 @@ export const GroupDashboardPage: React.FC = () => {
               (p) => p.id === participantId,
             );
             if (participant) {
-              if (
-                isOwner &&
-                participant.userId === user?.id
-              ) {
+              if (isOwner && participant.userId === user?.id) {
                 alert(
                   "O administrador não pode sair do grupo. Você deve deletar o grupo se quiser encerrá-lo.",
                 );

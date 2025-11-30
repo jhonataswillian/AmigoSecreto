@@ -295,7 +295,7 @@ export const GroupsPage: React.FC = () => {
             viewMode === "grid"
               ? "md:grid-cols-2 lg:grid-cols-3"
               : "grid-cols-1",
-            )}
+          )}
         >
           {filteredGroups.map((group) => (
             <GroupCard key={group.id} group={group} />
@@ -311,7 +311,11 @@ export const GroupsPage: React.FC = () => {
           Preencha as informações abaixo para criar um novo grupo de desejos.
         </div>
 
-        <form onSubmit={handleSubmit(onCreateGroup)} className="space-y-4" noValidate>
+        <form
+          onSubmit={handleSubmit(onCreateGroup)}
+          className="space-y-4"
+          noValidate
+        >
           <Input
             label="Nome do Grupo"
             placeholder="Ex: Família Silva 2025"

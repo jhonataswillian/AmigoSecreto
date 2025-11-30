@@ -258,7 +258,10 @@ export const useGroupStore = create<GroupState>((set, get) => ({
       .maybeSingle();
 
     if (error) console.error(error);
-    if (!profile) throw new Error(`Usuário "${searchHandle}" não encontrado. Verifique o @handle.`);
+    if (!profile)
+      throw new Error(
+        `Usuário "${searchHandle}" não encontrado. Verifique o @handle.`,
+      );
 
     // 2. Check if already member
     const { data: existing } = await supabase
@@ -347,7 +350,7 @@ export const useGroupStore = create<GroupState>((set, get) => ({
         user_id: member.user_id,
         type: "warning",
         title: "Removido do Grupo",
-         message: `Você foi removido do grupo "${(member.groups as unknown as { name: string }[])?.[0]?.name || "Amigo Secreto"}".`,
+        message: `Você foi removido do grupo "${(member.groups as unknown as { name: string }[])?.[0]?.name || "Amigo Secreto"}".`,
       });
     }
 

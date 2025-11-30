@@ -1,5 +1,8 @@
 import React, { useEffect } from "react";
-import { useNotificationStore, type Notification } from "../store/useNotificationStore";
+import {
+  useNotificationStore,
+  type Notification,
+} from "../store/useNotificationStore";
 import { useGroupStore } from "../store/useGroupStore";
 import { useAuthStore } from "../store/useAuthStore";
 import { Card } from "../components/ui/Card";

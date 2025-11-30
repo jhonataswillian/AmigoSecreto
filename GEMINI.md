@@ -78,9 +78,17 @@ Este documento define as diretrizes de atuação da IA (Gemini) no projeto **Ami
 
 - **Data:** 30/11/2025
 - **Ações Realizadas:**
+
   - **Criptografia de Banco de Dados:** Implementação de AES-256 (pgcrypto) na coluna `email` da tabela `profiles`.
   - **Segurança Frontend:** Remoção total da dependência de emails em texto plano (convites via `@handle`).
   - **Correção de Bugs Críticos:** Tratamento de datas inválidas que causavam crash na UI (`GroupDashboardPage`).
   - **UX/UI:** Melhoria na validação de formulários (mensagens personalizadas para datas passadas/inválidas).
   - **Limpeza:** Remoção de código legado de busca por email e exclusão da pasta vazia `src/services`.
   - **Correção de Tipagem:** Remoção de referências a `email` em `ProfilePage` e `DrawAnimation` para conformidade com a interface `User`.
+
+- **Data:** 30/11/2025 (Audit Final)
+- **Ações Realizadas:**
+  - **UI Mobile:** Refatoração completa de `ParticipantList` para layout vertical em tablets/mobile.
+  - **Error Handling:** Implementação de páginas de erro (400-500) e rotas de fallback.
+  - **Lint & Format:** Execução de `eslint --fix` e `prettier --write` em todo o projeto.
+  - **Build:** Verificação de build (`tsc` + `vite build`) com sucesso. Zero erros/warnings.

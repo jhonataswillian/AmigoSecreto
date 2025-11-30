@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useCallback } from "react";
 import { useAuthStore } from "../../store/useAuthStore";
 import { supabase } from "../../lib/supabase";

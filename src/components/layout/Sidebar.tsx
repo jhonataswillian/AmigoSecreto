@@ -1,6 +1,15 @@
 import React from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import { Home, Gift, Bell, User, LogOut, X, Github, Linkedin } from "lucide-react";
+import {
+  Home,
+  Gift,
+  Bell,
+  User,
+  LogOut,
+  X,
+  Github,
+  Linkedin,
+} from "lucide-react";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useNotificationStore } from "../../store/useNotificationStore";
 import { clsx } from "clsx";
@@ -149,7 +158,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           {/* Developer Credits */}
           <div className="px-4 py-4 text-center">
             <p className="text-[10px] text-white/40 mb-2 font-medium tracking-wide uppercase">
-              Desenvolvido com <span className="text-red-400 animate-pulse">❤</span> por
+              Desenvolvido com{" "}
+              <span className="text-red-400 animate-pulse">❤</span> por
             </p>
             <p className="text-xs text-white/60 font-medium mb-3">
               Jhonatas Willian
