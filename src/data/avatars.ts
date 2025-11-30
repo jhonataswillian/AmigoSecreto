@@ -1,56 +1,3 @@
-// Helper to load and sort avatars naturally
-const loadAvatars = (modules: Record<string, unknown>) => {
-  return Object.keys(modules)
-    .sort((a, b) =>
-      a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" }),
-    )
-    .map((key) => modules[key] as string);
-};
-
-// Helper to interleave men and women avatars
-const loadInterleavedAvatars = (modules: Record<string, unknown>) => {
-  const keys = Object.keys(modules);
-  const men = keys
-    .filter((k) => k.includes("homem"))
-    .sort((a, b) =>
-      a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" }),
-    );
-  const women = keys
-    .filter((k) => k.includes("mulher"))
-    .sort((a, b) =>
-      a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" }),
-    );
-
-  const interleaved: string[] = [];
-  const maxLength = Math.max(men.length, women.length);
-
-  for (let i = 0; i < maxLength; i++) {
-    if (men[i]) interleaved.push(modules[men[i]] as string);
-    if (women[i]) interleaved.push(modules[women[i]] as string);
-  }
-
-  return interleaved;
-};
-
-// Dynamic imports
-const peopleModules = import.meta.glob(
-  "../assets/images/pessoas/*.{png,jpg,jpeg,svg}",
-  { eager: true, import: "default" },
-);
-const peopleAvatars = loadInterleavedAvatars(peopleModules);
-
-const petModules = import.meta.glob(
-  "../assets/images/pets/*.{png,jpg,jpeg,svg}",
-  { eager: true, import: "default" },
-);
-const petAvatars = loadAvatars(petModules);
-
-const christmasModules = import.meta.glob(
-  "../assets/images/natal/*.{png,jpg,jpeg,svg}",
-  { eager: true, import: "default" },
-);
-const christmasAvatars = loadAvatars(christmasModules);
-
 import type { Frame } from "../types";
 
 export interface AvatarCategory {
@@ -58,6 +5,53 @@ export interface AvatarCategory {
   name: string;
   avatars: string[];
 }
+
+const christmasAvatars = [
+  "/assets/images/natal/natal1.png",
+  "/assets/images/natal/natal2.png",
+  "/assets/images/natal/natal3.png",
+  "/assets/images/natal/natal4.png",
+  "/assets/images/natal/natal5.png",
+  "/assets/images/natal/natal6.png",
+  "/assets/images/natal/natal7.png",
+  "/assets/images/natal/natal8.png",
+  "/assets/images/natal/natal9.png",
+  "/assets/images/natal/natal10.png",
+  "/assets/images/natal/natal11.png",
+  "/assets/images/natal/natal12.png",
+];
+
+const petAvatars = [
+  "/assets/images/pets/fofo1.png",
+  "/assets/images/pets/fofo2.png",
+  "/assets/images/pets/fofo3.png",
+  "/assets/images/pets/fofo4.png",
+  "/assets/images/pets/fofo5.png",
+  "/assets/images/pets/fofo6.png",
+  "/assets/images/pets/fofo7.png",
+  "/assets/images/pets/fofo8.png",
+  "/assets/images/pets/fofo9.png",
+  "/assets/images/pets/fofo10.png",
+  "/assets/images/pets/fofo11.png",
+  "/assets/images/pets/fofo12.png",
+];
+
+const peopleAvatars = [
+  "/assets/images/pessoas/homem1.png",
+  "/assets/images/pessoas/mulher1.png",
+  "/assets/images/pessoas/homem2.png",
+  "/assets/images/pessoas/mulher2.png",
+  "/assets/images/pessoas/homem3.png",
+  "/assets/images/pessoas/mulher3.png",
+  "/assets/images/pessoas/homem4.png",
+  "/assets/images/pessoas/mulher4.png",
+  "/assets/images/pessoas/homem5.png",
+  "/assets/images/pessoas/mulher5.png",
+  "/assets/images/pessoas/homem6.png",
+  "/assets/images/pessoas/mulher6.png",
+  "/assets/images/pessoas/homem7.png",
+  "/assets/images/pessoas/mulher7.png",
+];
 
 export const AVATAR_CATEGORIES: AvatarCategory[] = [
   {

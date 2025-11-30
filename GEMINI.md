@@ -88,7 +88,15 @@ Este documento define as diretrizes de atuação da IA (Gemini) no projeto **Ami
 
 - **Data:** 30/11/2025 (Audit Final)
 - **Ações Realizadas:**
+
   - **UI Mobile:** Refatoração completa de `ParticipantList` para layout vertical em tablets/mobile.
   - **Error Handling:** Implementação de páginas de erro (400-500) e rotas de fallback.
   - **Lint & Format:** Execução de `eslint --fix` e `prettier --write` em todo o projeto.
   - **Build:** Verificação de build (`tsc` + `vite build`) com sucesso. Zero erros/warnings.
+
+- **Data:** 30/11/2025 (Refatoração Donate & QR Code)
+- **Ações Realizadas:**
+  - **Refatoração de Rota:** Mudança de `/support` para `/donate` (interna) e renomeação de arquivos (`DonatePage.tsx`).
+  - **Limpeza:** Remoção de `AuthHeader` e rota pública `/donate`.
+  - **UX/UI:** Implementação de Zoom no QR Code com Portal (foco e nitidez) e ajuste de centralização desktop (offset sidebar).
+  - **Build:** Verificação de build (`tsc` + `vite build`) com sucesso.

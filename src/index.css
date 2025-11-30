@@ -51,8 +51,7 @@
 @layer base {
   body {
     @apply bg-christmas-cream text-christmas-dark font-sans antialiased overflow-x-hidden;
-    background-image:
-      radial-gradient(
+    background-image: radial-gradient(
         circle at 50% 0%,
         rgba(212, 175, 55, 0.15) 0%,
         transparent 50%
@@ -90,4 +89,11 @@
 }
 ::-webkit-scrollbar-thumb {
   @apply bg-christmas-wine/30 rounded-full hover:bg-christmas-wine/60 transition-colors;
+}
+
+@utility image-pixelated {
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-crisp-edges;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
 }

@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import type { User, WishlistItem } from "../types";
 import { supabase } from "../lib/supabase";
+import { getRandomAvatar } from "../utils/avatarList";
 
 interface AuthState {
   user: User | null;
@@ -146,7 +147,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         data: {
           name,
           handle,
-          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${handle}`,
+          avatar: getRandomAvatar(),
         },
       },
     });

@@ -9,6 +9,7 @@ import {
   X,
   Github,
   Linkedin,
+  Heart,
 } from "lucide-react";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useNotificationStore } from "../../store/useNotificationStore";
@@ -47,6 +48,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       badge: unreadCount,
     },
     { path: "/profile", icon: User, label: "Perfil" },
+    { path: "/donate", icon: Heart, label: "Contribua" },
   ];
 
   return (

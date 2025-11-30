@@ -10,6 +10,7 @@ import { JoinGroupPage } from "./pages/JoinGroupPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { MyWishlistPage } from "./pages/MyWishlistPage";
 import { NotificationsPage } from "./pages/NotificationsPage";
+import { DonatePage } from "./pages/DonatePage";
 import { ErrorPage } from "./pages/ErrorPage";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { AutoLogout } from "./components/auth/AutoLogout";
@@ -78,6 +79,7 @@ function App() {
             <Route path="wishlist" element={<MyWishlistPage />} />
             <Route path="notifications" element={<NotificationsPage />} />
             <Route path="profile" element={<ProfilePage />} />
+            <Route path="donate" element={<DonatePage />} />
           </Route>
         </Routes>
       </BrowserRouter>
