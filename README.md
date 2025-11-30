@@ -17,6 +17,7 @@
 - **Effortless Organization**: Create and customize groups with event dates, budget limits, and descriptions.
 - **Smart Invites**: Seamlessly invite participants via email or unique user `@handles`.
 - **Secure Administration**: Robust controls for group owners, including safe deletion protocols.
+- **Data Privacy**: End-to-end encryption (AES-256) for sensitive user data.
 
 ### 🎁 Interactive Wishlists
 
