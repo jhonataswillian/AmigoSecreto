@@ -478,7 +478,15 @@ export const useGroupStore = create<GroupState>((set, get) => ({
     // Ideally use an RPC, but here we go:
 
     // Clear old draws (if any) - RLS allows owner to delete
-    await supabase.from("draws").delete().eq("group_id", groupId);
+    // Clear old draws (if any) - Using RPC to bypass RLS visibility issues
+    const { error: deleteError } = await supabase.rpc("clear_group_draws", {
+      p_group_id: groupId,
+    });
+
+    if (deleteError) {
+      console.error("Error clearing old draws:", deleteError);
+      throw new Error("Erro ao limpar sorteio anterior. Tente novamente.");
+    }
 
     // Insert new draws
     const { error: drawError } = await supabase.from("draws").insert(draws);
