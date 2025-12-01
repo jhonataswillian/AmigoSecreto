@@ -11,12 +11,14 @@ import {
   ExternalLink,
   Edit2,
   AlertTriangle,
+  HelpCircle,
 } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { Card } from "../components/ui/Card";
 import { Modal } from "../components/ui/Modal";
+import { WishlistHelpModal } from "../components/wishlist/WishlistHelpModal";
 import type { WishlistItem } from "../types";
 import { useToast } from "../hooks/useToast";
 
@@ -37,6 +39,7 @@ export const MyWishlistPage: React.FC = () => {
     useAuthStore();
   const { addToast } = useToast();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [editingItem, setEditingItem] = useState<WishlistItem | null>(null);
 
@@ -183,6 +186,19 @@ export const MyWishlistPage: React.FC = () => {
           <p className="text-gray-600 mt-1">
             Ajude seu Amigo Secreto a escolher o presente perfeito para você!
           </p>
+          {/* Added help button */}
+          <div className="flex items-center gap-2 mt-1">
+            <p className="text-gray-600">
+              Gerencie seus desejos para ajudar seu amigo secreto.
+            </p>
+            <button
+              onClick={() => setIsHelpModalOpen(true)}
+              className="text-sm font-medium text-christmas-wine hover:text-christmas-wine-light hover:underline flex items-center gap-1 transition-colors"
+            >
+              <HelpCircle className="w-4 h-4" />
+              Como funciona?
+            </button>
+          </div>
         </div>
         <div className="flex items-center gap-4">
           <span className="text-lg font-bold text-christmas-wine bg-christmas-wine/10 px-4 py-2 rounded-xl">
@@ -396,6 +412,11 @@ export const MyWishlistPage: React.FC = () => {
           </div>
         </div>
       </Modal>
+
+      <WishlistHelpModal
+        isOpen={isHelpModalOpen}
+        onClose={() => setIsHelpModalOpen(false)}
+      />
     </div>
   );
 };
