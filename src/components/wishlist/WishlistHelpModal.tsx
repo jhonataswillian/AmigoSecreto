@@ -13,12 +13,12 @@ export function WishlistHelpModal({ isOpen, onClose }: WishlistHelpModalProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:pl-72">
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+        className="absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity"
         onClick={onClose}
       />
 
       {/* Modal Content */}
-      <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200 ring-1 ring-white/20 flex flex-col max-h-[90vh]">
         {/* Header with Christmas Theme */}
         <div className="bg-linear-to-r from-red-600 to-red-700 p-6 text-white relative overflow-hidden">
           <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
@@ -44,7 +44,7 @@ export function WishlistHelpModal({ isOpen, onClose }: WishlistHelpModalProps) {
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-6 overflow-y-auto">
           <p className="text-gray-600 text-sm leading-relaxed">
             Você pode adicionar até <strong className="text-red-600">3 sugestões</strong> de presentes. 
             Isso não é uma lista de compras obrigatória, mas sim um guia para inspirar quem tirou você! 🎁
