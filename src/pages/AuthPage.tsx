@@ -416,19 +416,70 @@ export const AuthPage: React.FC = () => {
                     className="bg-gray-50/50 border-gray-200 focus:bg-white transition-colors"
                   />
 
-                  <Input
-                    label="Senha"
-                    type="password"
-                    placeholder="•••••••"
-                    icon={<Lock className="w-5 h-5" />}
-                    error={registerErrors.password?.message}
-                    {...registerRegister("password")}
-                    className="bg-gray-50/50 border-gray-200 focus:bg-white transition-colors"
-                  />
-                  <p className="text-xs text-gray-500 -mt-2 pl-1 flex items-center gap-1">
-                    <span className="w-1 h-1 rounded-full bg-gray-400" />
-                    Mínimo 7 caracteres, 1 maiúscula, 1 minúscula, 1 número.
-                  </p>
+                  <div className="space-y-2">
+                    <Input
+                      label="Senha"
+                      type="password"
+                      placeholder="•••••••"
+                      icon={<Lock className="w-5 h-5" />}
+                      error={registerErrors.password?.message}
+                      {...registerRegister("password")}
+                      className="bg-gray-50/50 border-gray-200 focus:bg-white transition-colors"
+                    />
+
+                    {(watchRegister("password") || "").length > 0 && (
+                      <div className="bg-gray-50 p-3 rounded-lg space-y-2 animate-in fade-in slide-in-from-top-2">
+                        <p className="text-xs font-medium text-gray-500 mb-2">
+                          Requisitos da senha:
+                        </p>
+                        {[
+                          {
+                            label: "Pelo menos 7 caracteres",
+                            test: (p: string) => p.length >= 7,
+                          },
+                          {
+                            label: "Uma letra maiúscula",
+                            test: (p: string) => /[A-Z]/.test(p),
+                          },
+                          {
+                            label: "Uma letra minúscula",
+                            test: (p: string) => /[a-z]/.test(p),
+                          },
+                          {
+                            label: "Um número",
+                            test: (p: string) => /[0-9]/.test(p),
+                          },
+                        ].map((req, index) => {
+                          const met = req.test(watchRegister("password") || "");
+                          return (
+                            <div
+                              key={index}
+                              className={clsx(
+                                "flex items-center gap-2 text-xs transition-colors duration-200",
+                                met ? "text-green-600" : "text-gray-400",
+                              )}
+                            >
+                              <div
+                                className={clsx(
+                                  "w-4 h-4 rounded-full flex items-center justify-center border",
+                                  met
+                                    ? "bg-green-100 border-green-200"
+                                    : "bg-gray-100 border-gray-200",
+                                )}
+                              >
+                                {met && (
+                                  <div className="w-2 h-2 bg-green-500 rounded-full" />
+                                )}
+                              </div>
+                              <span className={clsx(met && "font-medium")}>
+                                {req.label}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
 
                   <Input
                     label="Confirmar Senha"
