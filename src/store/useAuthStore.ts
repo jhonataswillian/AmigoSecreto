@@ -162,7 +162,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   addToWishlist: async (item) => {
     const { user } = get();
-    if (!user) return;
+    if (!user) throw new Error("Usuário não autenticado");
+
+    // Verify session before action
+    const { data: sessionData, error: sessionError } =
+      await supabase.auth.getSession();
+    if (sessionError || !sessionData.session) {
+      throw new Error("Sessão expirada. Por favor, faça login novamente.");
+    }
 
     const { data, error } = await supabase
       .from("wishlist_items")
@@ -176,7 +183,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error("Erro ao adicionar desejo:", error);
+      throw error;
+    }
 
     set((state) => ({
       wishlist: [

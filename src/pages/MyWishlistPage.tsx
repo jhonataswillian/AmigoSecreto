@@ -49,6 +49,12 @@ export const MyWishlistPage: React.FC = () => {
     formState: { errors },
   } = useForm<WishlistForm>({
     resolver: zodResolver(wishlistSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      price: "",
+      link: "",
+    },
   });
 
   const handleOpenModal = (item?: WishlistItem) => {
@@ -72,14 +78,21 @@ export const MyWishlistPage: React.FC = () => {
   };
 
   const onSubmit = async (data: WishlistForm) => {
+    console.log("Submitting form data:", data);
     try {
       setIsLoading(true);
+
+      // Sanitize price (replace comma with dot)
+      const sanitizedPrice = data.price ? data.price.replace(",", ".") : "";
+
       const itemData = {
         name: data.name,
         description: data.description || null,
-        price: data.price ? Number(data.price) : null,
+        price: sanitizedPrice ? Number(sanitizedPrice) : null,
         link: data.link || null,
       };
+
+      console.log("Processed item data:", itemData);
 
       // Safety timeout to prevent infinite loading
       const timeoutPromise = new Promise((_, reject) =>
@@ -95,9 +108,10 @@ export const MyWishlistPage: React.FC = () => {
         await Promise.race([addToWishlist(itemData), timeoutPromise]);
       }
 
+      console.log("Operation successful");
       handleCloseModal();
     } catch (error) {
-      console.error(error);
+      console.error("Error in onSubmit:", error);
     } finally {
       setIsLoading(false);
     }
