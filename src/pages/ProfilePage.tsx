@@ -128,16 +128,25 @@ export const ProfilePage: React.FC = () => {
     setSuccess("");
     setError("");
     try {
-      // Update Avatar/Frame
-      await updateProfile({
-        avatar: selectedAvatar,
-        frame: selectedFrame,
-      });
+      // Safety timeout
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Timeout")), 10000),
+      );
 
-      // Update Name if changed
-      if (name !== user?.name) {
-        await updateName(name);
-      }
+      const updatePromise = (async () => {
+        // Update Avatar/Frame
+        await updateProfile({
+          avatar: selectedAvatar,
+          frame: selectedFrame,
+        });
+
+        // Update Name if changed
+        if (name !== user?.name) {
+          await updateName(name);
+        }
+      })();
+
+      await Promise.race([updatePromise, timeoutPromise]);
 
       setSuccess("Perfil atualizado com sucesso!");
       setTimeout(() => setSuccess(""), 3000);
@@ -278,7 +287,7 @@ export const ProfilePage: React.FC = () => {
                 </div>
                 <div className="text-center">
                   <p className="text-sm text-gray-500">
-                    Toque no lápis para editar
+                    Toque na foto para editar
                   </p>
                 </div>
               </div>

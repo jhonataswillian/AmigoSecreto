@@ -130,12 +130,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                   onClick={() => onClose()}
                   className={({ isActive }) =>
                     cn(
-                      "flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 font-medium group relative",
+                      "flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 font-medium group relative notranslate",
                       isActive
                         ? "bg-white text-christmas-wine shadow-lg shadow-black/10"
                         : "text-white/80 hover:bg-white/10 hover:text-white",
                     )
                   }
+                  translate="no"
                 >
                   <item.icon
                     className={cn(

@@ -31,23 +31,23 @@ export const DonationContent: React.FC = () => {
               className="fixed inset-0 md:left-72 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 cursor-zoom-out"
             >
               <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white p-6 rounded-3xl shadow-2xl max-w-md w-full flex flex-col relative"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="w-full aspect-square overflow-hidden rounded-xl bg-white flex items-center justify-center border-4 border-gray-100 p-4">
-                <img
-                  src="/assets/qrcode-pix.png"
-                  alt="QR Code Pix Zoom"
-                  className="w-full h-full object-contain image-pixelated"
-                />
-              </div>
-              <p className="text-center text-lg text-gray-600 mt-6 font-bold">
-                Escaneie o QR Code para contribuir
-              </p>
-            </motion.div>
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="bg-white p-6 rounded-3xl shadow-2xl max-w-md w-full flex flex-col relative"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="w-full aspect-square overflow-hidden rounded-xl bg-white flex items-center justify-center border-4 border-gray-100 p-4">
+                  <img
+                    src="/assets/qrcode-pix.png"
+                    alt="QR Code Pix Zoom"
+                    className="w-full h-full object-contain image-pixelated"
+                  />
+                </div>
+                <p className="text-center text-lg text-gray-600 mt-6 font-bold">
+                  Escaneie o QR Code para contribuir
+                </p>
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>,
@@ -58,10 +58,14 @@ export const DonationContent: React.FC = () => {
         <div className="p-8 space-y-6">
           <div className="text-center space-y-4">
             <p className="text-gray-600 leading-relaxed">
-              O <strong>Amigo Secreto</strong> é um projeto desenvolvido com muito carinho e disponibilizado gratuitamente para unir famílias e amigos.
+              O <strong>Amigo Secreto</strong> é um projeto desenvolvido com
+              muito carinho e disponibilizado gratuitamente para unir famílias e
+              amigos.
             </p>
             <p className="text-gray-600 leading-relaxed">
-              Se você gostou da experiência e quiser contribuir com qualquer valor para ajudar nos custos de servidor e manutenção, ficarei muito grato! ❤️
+              Se você gostou da experiência e quiser contribuir com qualquer
+              valor para ajudar nos custos de servidor e manutenção, ficarei
+              muito grato! ❤️
             </p>
           </div>
 
@@ -81,7 +85,7 @@ export const DonationContent: React.FC = () => {
                 className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 image-pixelated"
               />
             </button>
-            
+
             <div className="w-full">
               <p className="text-xs text-gray-500 font-medium mb-2 text-center uppercase tracking-wider">
                 Chave Pix (Copia e Cola)
@@ -93,16 +97,28 @@ export const DonationContent: React.FC = () => {
                 <Button
                   size="sm"
                   onClick={handleCopyPix}
-                  className={copied ? "bg-green-500 hover:bg-green-600 text-white px-3" : "bg-christmas-wine hover:bg-christmas-wine-light text-white px-3"}
+                  className={
+                    copied
+                      ? "bg-green-500 hover:bg-green-600 text-white px-3"
+                      : "bg-christmas-wine hover:bg-christmas-wine-light text-white px-3"
+                  }
                   title="Copiar Chave Pix"
                 >
-                  {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  {copied ? (
+                    <Check className="w-4 h-4" />
+                  ) : (
+                    <Copy className="w-4 h-4" />
+                  )}
                 </Button>
               </div>
 
               <div className="mt-4 text-center space-y-1 bg-white/50 p-3 rounded-lg border border-gray-100">
-                <p className="text-sm font-semibold text-gray-700">Banco Inter</p>
-                <p className="text-sm text-gray-600">Jhonatas Willian Nicolete</p>
+                <p className="text-sm font-semibold text-gray-700">
+                  Banco Inter
+                </p>
+                <p className="text-sm text-gray-600">
+                  Jhonatas Willian Nicolete
+                </p>
               </div>
             </div>
           </div>

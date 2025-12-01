@@ -96,7 +96,18 @@ Este documento define as diretrizes de atuação da IA (Gemini) no projeto **Ami
 
 - **Data:** 30/11/2025 (Refatoração Donate & QR Code)
 - **Ações Realizadas:**
+
   - **Refatoração de Rota:** Mudança de `/support` para `/donate` (interna) e renomeação de arquivos (`DonatePage.tsx`).
   - **Limpeza:** Remoção de `AuthHeader` e rota pública `/donate`.
   - **UX/UI:** Implementação de Zoom no QR Code com Portal (foco e nitidez) e ajuste de centralização desktop (offset sidebar).
   - **Build:** Verificação de build (`tsc` + `vite build`) com sucesso.
+
+- **Data:** 30/11/2025 (Correção de Bugs Críticos & Cleanup)
+- **Ações Realizadas:**
+  - **Wishlist:** Correção de título ("desejo" -> "Presente"), bloqueio de tradução e timeout de segurança (10s) para evitar loop infinito.
+  - **Perfil:** Correção de texto e timeout de segurança (10s) ao salvar.
+  - **Grupos:** Correção crítica de carregamento infinito (loop em `getGroup`) com timeout (15s) e tratamento de erro robusto.
+  - **Lixeira:** Adição de feedback visual (loading) e timeout ao excluir itens.
+  - **Global:** Bloqueio de tradução automática (`translate="no"`) em todo o app (`<body>`).
+  - **Vercel:** Criação de `vercel.json` para corrigir erro 404 ao recarregar páginas (SPA routing).
+  - **Lint & Format:** Execução final de `eslint` (0 erros) e `prettier` em todo o projeto.

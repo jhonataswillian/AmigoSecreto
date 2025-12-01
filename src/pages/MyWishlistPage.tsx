@@ -78,10 +78,18 @@ export const MyWishlistPage: React.FC = () => {
         link: data.link || undefined,
       };
 
+      // Safety timeout to prevent infinite loading
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Timeout")), 10000),
+      );
+
       if (editingItem) {
-        await updateWishlistItem(editingItem.id, itemData);
+        await Promise.race([
+          updateWishlistItem(editingItem.id, itemData),
+          timeoutPromise,
+        ]);
       } else {
-        await addToWishlist(itemData);
+        await Promise.race([addToWishlist(itemData), timeoutPromise]);
       }
 
       handleCloseModal();
@@ -99,9 +107,22 @@ export const MyWishlistPage: React.FC = () => {
 
   const handleDelete = async () => {
     if (itemToDelete) {
-      await removeFromWishlist(itemToDelete);
-      setDeleteModalOpen(false);
-      setItemToDelete(null);
+      try {
+        setIsLoading(true);
+        // Safety timeout
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Timeout")), 10000),
+        );
+
+        await Promise.race([removeFromWishlist(itemToDelete), timeoutPromise]);
+
+        setDeleteModalOpen(false);
+        setItemToDelete(null);
+      } catch (error) {
+        console.error("Failed to delete item:", error);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -320,6 +341,7 @@ export const MyWishlistPage: React.FC = () => {
             <Button
               className="flex-1 bg-red-600 hover:bg-red-700 text-white"
               onClick={handleDelete}
+              isLoading={isLoading}
             >
               Confirmar Exclusão
             </Button>

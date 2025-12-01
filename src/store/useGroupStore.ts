@@ -112,128 +112,140 @@ export const useGroupStore = create<GroupState>((set, get) => ({
 
   getGroup: async (id) => {
     set({ isLoading: true });
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
 
     try {
-      // 1. Fetch Group Details
-      const { data: groupData, error: groupError } = await supabase
-        .from("groups")
-        .select("*")
-        .eq("id", id)
-        .single();
+      // Safety timeout
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Timeout")), 15000),
+      );
 
-      if (groupError) throw groupError;
+      const fetchPromise = (async () => {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
 
-      // 2. Fetch Members
-      const { data: membersData, error: membersError } = await supabase
-        .from("group_members")
-        .select("id, user_id, is_admin")
-        .eq("group_id", id);
-
-      if (membersError) throw membersError;
-
-      // 3. Fetch Profiles and Wishlists manually to avoid relationship issues
-      const userIds = membersData.map((m) => m.user_id);
-
-      const [profilesResult, wishlistsResult] = await Promise.all([
-        supabase.from("profiles").select("*").in("id", userIds),
-        supabase.from("wishlist_items").select("*").in("user_id", userIds),
-      ]);
-
-      if (profilesResult.error) throw profilesResult.error;
-      // Wishlist error is non-critical, can ignore or log
-      if (wishlistsResult.error)
-        console.error("Error fetching wishlists:", wishlistsResult.error);
-
-      const profilesMap = new Map(profilesResult.data?.map((p) => [p.id, p]));
-      const wishlistsMap = new Map();
-      wishlistsResult.data?.forEach((w) => {
-        if (!wishlistsMap.has(w.user_id)) wishlistsMap.set(w.user_id, []);
-        wishlistsMap.get(w.user_id).push(w);
-      });
-
-      // 4. Fetch My Draw (if exists)
-      let myMatchId: string | undefined;
-      if (user && groupData.status === "drawn") {
-        const { data: drawData } = await supabase
-          .from("draws")
-          .select("receiver_id")
-          .eq("group_id", id)
-          .eq("giver_id", user.id)
+        // 1. Fetch Group Details
+        const { data: groupData, error: groupError } = await supabase
+          .from("groups")
+          .select("*")
+          .eq("id", id)
           .single();
 
-        if (drawData) {
-          myMatchId = drawData.receiver_id;
+        if (groupError) throw groupError;
+
+        // 2. Fetch Members
+        const { data: membersData, error: membersError } = await supabase
+          .from("group_members")
+          .select("id, user_id, is_admin")
+          .eq("group_id", id);
+
+        if (membersError) throw membersError;
+
+        // 3. Fetch Profiles and Wishlists manually to avoid relationship issues
+        const userIds = membersData.map((m) => m.user_id);
+
+        const [profilesResult, wishlistsResult] = await Promise.all([
+          supabase.from("profiles").select("*").in("id", userIds),
+          supabase.from("wishlist_items").select("*").in("user_id", userIds),
+        ]);
+
+        if (profilesResult.error) throw profilesResult.error;
+        // Wishlist error is non-critical, can ignore or log
+        if (wishlistsResult.error)
+          console.error("Error fetching wishlists:", wishlistsResult.error);
+
+        const profilesMap = new Map(profilesResult.data?.map((p) => [p.id, p]));
+        const wishlistsMap = new Map();
+        wishlistsResult.data?.forEach((w) => {
+          if (!wishlistsMap.has(w.user_id)) wishlistsMap.set(w.user_id, []);
+          wishlistsMap.get(w.user_id).push(w);
+        });
+
+        // 4. Fetch My Draw (if exists)
+        let myMatchId: string | undefined;
+        if (user && groupData.status === "drawn") {
+          const { data: drawData } = await supabase
+            .from("draws")
+            .select("receiver_id")
+            .eq("group_id", id)
+            .eq("giver_id", user.id)
+            .single();
+
+          if (drawData) {
+            myMatchId = drawData.receiver_id;
+          }
         }
-      }
 
-      // 5. Map to Participant Type
-      const participants: Participant[] = membersData.map((m) => {
-        const profile = profilesMap.get(m.user_id);
-        const wishlist = wishlistsMap.get(m.user_id) || [];
+        // 5. Map to Participant Type
+        const participants: Participant[] = membersData.map((m) => {
+          const profile = profilesMap.get(m.user_id);
+          const wishlist = wishlistsMap.get(m.user_id) || [];
 
-        // Fallback if profile not found (shouldn't happen usually)
-        if (!profile) {
+          // Fallback if profile not found (shouldn't happen usually)
+          if (!profile) {
+            return {
+              id: m.id,
+              userId: m.user_id,
+              name: "Usuário Desconhecido",
+              handle: "",
+              avatar: "",
+              wishlist: [],
+              // isAdmin: m.is_admin // Type definition might not have it yet, but we can add it
+            } as Participant;
+          }
+
           return {
-            id: m.id,
-            userId: m.user_id,
-            name: "Usuário Desconhecido",
-            handle: "",
-            avatar: "",
-            wishlist: [],
-            // isAdmin: m.is_admin // Type definition might not have it yet, but we can add it
-          } as Participant;
+            id: m.id, // group_member id
+            userId: profile.id,
+            name: profile.name,
+            handle: profile.handle,
+            avatar: profile.avatar,
+            frame: profile.frame,
+            wishlist: wishlist.map((w: WishlistItem) => ({
+              id: w.id,
+              name: w.name,
+              description: w.description,
+              price: w.price,
+              link: w.link,
+            })),
+            // isAdmin: m.is_admin,
+          };
+        });
+
+        // 6. Link the draw match
+        if (myMatchId) {
+          const myParticipantIndex = participants.findIndex(
+            (p) => p.userId === user?.id,
+          );
+          const receiverParticipant = participants.find(
+            (p) => p.userId === myMatchId,
+          );
+
+          if (myParticipantIndex !== -1 && receiverParticipant) {
+            participants[myParticipantIndex].assignedToId =
+              receiverParticipant.id;
+          }
         }
 
-        return {
-          id: m.id, // group_member id
-          userId: profile.id,
-          name: profile.name,
-          handle: profile.handle,
-          avatar: profile.avatar,
-          frame: profile.frame,
-          wishlist: wishlist.map((w: WishlistItem) => ({
-            id: w.id,
-            name: w.name,
-            description: w.description,
-            price: w.price,
-            link: w.link,
-          })),
-          // isAdmin: m.is_admin,
+        const currentGroup: Group = {
+          id: groupData.id,
+          name: groupData.name,
+          description: groupData.description,
+          ownerId: groupData.owner_id,
+          eventDate: groupData.event_date,
+          maxPrice: groupData.max_price,
+          status: groupData.status,
+          participants,
         };
-      });
 
-      // 6. Link the draw match
-      if (myMatchId) {
-        const myParticipantIndex = participants.findIndex(
-          (p) => p.userId === user?.id,
-        );
-        const receiverParticipant = participants.find(
-          (p) => p.userId === myMatchId,
-        );
+        set({ currentGroup });
+      })();
 
-        if (myParticipantIndex !== -1 && receiverParticipant) {
-          participants[myParticipantIndex].assignedToId =
-            receiverParticipant.id;
-        }
-      }
-
-      const currentGroup: Group = {
-        id: groupData.id,
-        name: groupData.name,
-        description: groupData.description,
-        ownerId: groupData.owner_id,
-        eventDate: groupData.event_date,
-        maxPrice: groupData.max_price,
-        status: groupData.status,
-        participants,
-      };
-
-      set({ currentGroup, isLoading: false });
+      await Promise.race([fetchPromise, timeoutPromise]);
     } catch (error) {
       console.error("Error in getGroup:", error);
+      // Don't clear currentGroup on error to avoid flickering if it was just a refresh
+    } finally {
       set({ isLoading: false });
     }
   },
