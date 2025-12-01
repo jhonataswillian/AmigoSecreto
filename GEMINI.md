@@ -31,7 +31,6 @@ Este documento define as diretrizes de atuação da IA (Gemini) no projeto **Ami
 ## 5. Organização e Arquitetura
 
 - **Estrutura de Pastas:**
-
   - `src/components/ui`: Componentes genéricos (Button, Input, Card).
   - `src/components/[feature]`: Componentes específicos de funcionalidade.
   - `src/pages`: Páginas da aplicação (rotas).
@@ -67,7 +66,6 @@ Este documento define as diretrizes de atuação da IA (Gemini) no projeto **Ami
 
 - **Data:** 29/11/2025
 - **Ações Realizadas:**
-
   - Remoção de código morto (dead code).
   - Correção de 100% dos erros e warnings de ESLint.
   - Formatação de todo o projeto com Prettier.
@@ -78,7 +76,6 @@ Este documento define as diretrizes de atuação da IA (Gemini) no projeto **Ami
 
 - **Data:** 30/11/2025
 - **Ações Realizadas:**
-
   - **Criptografia de Banco de Dados:** Implementação de AES-256 (pgcrypto) na coluna `email` da tabela `profiles`.
   - **Segurança Frontend:** Remoção total da dependência de emails em texto plano (convites via `@handle`).
   - **Correção de Bugs Críticos:** Tratamento de datas inválidas que causavam crash na UI (`GroupDashboardPage`).
@@ -88,7 +85,6 @@ Este documento define as diretrizes de atuação da IA (Gemini) no projeto **Ami
 
 - **Data:** 30/11/2025 (Audit Final)
 - **Ações Realizadas:**
-
   - **UI Mobile:** Refatoração completa de `ParticipantList` para layout vertical em tablets/mobile.
   - **Error Handling:** Implementação de páginas de erro (400-500) e rotas de fallback.
   - **Lint & Format:** Execução de `eslint --fix` e `prettier --write` em todo o projeto.
@@ -96,7 +92,6 @@ Este documento define as diretrizes de atuação da IA (Gemini) no projeto **Ami
 
 - **Data:** 30/11/2025 (Refatoração Donate & QR Code)
 - **Ações Realizadas:**
-
   - **Refatoração de Rota:** Mudança de `/support` para `/donate` (interna) e renomeação de arquivos (`DonatePage.tsx`).
   - **Limpeza:** Remoção de `AuthHeader` e rota pública `/donate`.
   - **UX/UI:** Implementação de Zoom no QR Code com Portal (foco e nitidez) e ajuste de centralização desktop (offset sidebar).

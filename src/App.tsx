@@ -11,6 +11,7 @@ import { ProfilePage } from "./pages/ProfilePage";
 import { MyWishlistPage } from "./pages/MyWishlistPage";
 import { NotificationsPage } from "./pages/NotificationsPage";
 import { DonatePage } from "./pages/DonatePage";
+import { TermsPage } from "./pages/TermsPage";
 import { ErrorPage } from "./pages/ErrorPage";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { AutoLogout } from "./components/auth/AutoLogout";
@@ -52,8 +53,10 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<AuthPage />} />
+          <Route path="/register" element={<AuthPage />} />
           <Route path="/invite/:code" element={<JoinGroupPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/terms" element={<TermsPage />} />
 
           {/* Error Pages */}
           <Route path="/400" element={<ErrorPage code={400} />} />

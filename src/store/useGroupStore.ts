@@ -147,7 +147,7 @@ export const useGroupStore = create<GroupState>((set, get) => ({
     groupId: string,
     data: Partial<Omit<Group, "id" | "participants" | "status" | "ownerId">>,
   ) => {
-    const updateData: Record<string, any> = {};
+    const updateData: Record<string, string | number | null> = {};
     if (data.name !== undefined) updateData.name = data.name;
     if (data.description !== undefined)
       updateData.description = data.description;

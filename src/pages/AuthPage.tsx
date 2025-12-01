@@ -45,6 +45,9 @@ const registerSchema = z
       .regex(/[a-z]/, "Deve conter pelo menos uma letra minúscula")
       .regex(/[0-9]/, "Deve conter pelo menos um número"),
     confirmPassword: z.string(),
+    termsAccepted: z.boolean().refine((val) => val === true, {
+      message: "Você deve aceitar os termos de uso",
+    }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Senhas não conferem",
@@ -491,6 +494,39 @@ export const AuthPage: React.FC = () => {
                     className="bg-gray-50/50 border-gray-200 focus:bg-white transition-colors"
                   />
 
+                  <div className="space-y-1">
+                    <div className="flex items-start gap-3">
+                      <div className="flex items-center h-5 mt-0.5">
+                        <input
+                          id="terms"
+                          type="checkbox"
+                          {...registerRegister("termsAccepted")}
+                          className="w-4 h-4 border-2 border-gray-300 rounded bg-white checked:bg-christmas-wine checked:border-christmas-wine focus:ring-2 focus:ring-christmas-wine/20 transition-colors cursor-pointer"
+                        />
+                      </div>
+                      <label
+                        htmlFor="terms"
+                        className="text-sm text-gray-600 leading-tight select-none cursor-pointer"
+                      >
+                        Li e concordo com os{" "}
+                        <a
+                          href="/terms"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-bold text-christmas-wine hover:underline"
+                        >
+                          Termos de Uso
+                        </a>{" "}
+                        e Política de Privacidade do Amigo Secreto.
+                      </label>
+                    </div>
+                    {registerErrors.termsAccepted && (
+                      <p className="text-xs text-red-500 font-medium pl-7 animate-in slide-in-from-left-1">
+                        {registerErrors.termsAccepted.message}
+                      </p>
+                    )}
+                  </div>
+
                   <Button
                     type="submit"
                     className="w-full mt-4 bg-christmas-wine hover:bg-christmas-wine-light text-white shadow-lg shadow-christmas-wine/20 py-6 text-base"
@@ -505,6 +541,13 @@ export const AuthPage: React.FC = () => {
           </div>
         </div>
       </Card>
+
+      {/* Footer */}
+      <div className="mt-8 text-center relative z-10">
+        <p className="text-sm text-gray-500 font-medium">
+          Amigo Secreto © 2025 - Todos os direitos reservados.
+        </p>
+      </div>
     </div>
   );
 };

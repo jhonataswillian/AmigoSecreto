@@ -148,6 +148,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           name,
           handle,
           avatar: getRandomAvatar(),
+          terms_accepted: true,
         },
       },
     });
@@ -234,7 +235,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       ...data,
       description:
         data.description === undefined ? undefined : data.description || null,
-      price: data.price === undefined ? undefined : data.price ?? null,
+      price: data.price === undefined ? undefined : (data.price ?? null),
       link: data.link === undefined ? undefined : data.link || null,
     };
 
