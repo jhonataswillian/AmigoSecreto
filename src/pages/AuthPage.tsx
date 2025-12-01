@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import {
   Mail,
   Lock,
@@ -67,6 +67,8 @@ type RegisterForm = z.infer<typeof registerSchema>;
 export const AuthPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const returnUrl = searchParams.get("returnUrl") || "/groups";
   const { login, register: registerUser } = useAuthStore();
 
   // Determine initial mode based on URL path
@@ -127,7 +129,7 @@ export const AuthPage: React.FC = () => {
     setSuccessMessage(null);
   }, [mode, resetLogin, resetRegister]);
 
-  // Handle auto-prefixing @ for handle
+  // Handle auto-prefixing for handle
   const handleValue = watchRegister("handle");
   React.useEffect(() => {
     if (handleValue && !handleValue.startsWith("@")) {
@@ -148,7 +150,7 @@ export const AuthPage: React.FC = () => {
       }
 
       await login(data.identifier, data.password);
-      navigate("/groups");
+      navigate(returnUrl);
     } catch (error) {
       console.error(error);
       let message =
@@ -179,7 +181,7 @@ export const AuthPage: React.FC = () => {
 
       setSuccessMessage("Conta criada com sucesso! Redirecionando...");
       setTimeout(() => {
-        navigate("/groups");
+        navigate(returnUrl);
       }, 1500);
     } catch (error) {
       console.error(error);

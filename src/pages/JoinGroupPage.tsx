@@ -41,6 +41,8 @@ export const JoinGroupPage: React.FC = () => {
     if (!code) return;
 
     if (!user) {
+      // Store invite code in session storage as backup
+      sessionStorage.setItem("pendingInviteCode", code);
       // Redirect to login with return url
       navigate(`/login?returnUrl=/invite/${code}`);
       return;
@@ -49,6 +51,7 @@ export const JoinGroupPage: React.FC = () => {
     setIsJoining(true);
     try {
       const groupId = await joinByInvite(code);
+      sessionStorage.removeItem("pendingInviteCode");
       navigate(`/groups/${groupId}`);
     } catch (err: unknown) {
       setError((err as Error).message || "Erro ao entrar no grupo.");

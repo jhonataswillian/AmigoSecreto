@@ -569,24 +569,24 @@ export const useGroupStore = create<GroupState>((set, get) => ({
   },
 
   getInviteInfo: async (code) => {
-    const { data, error } = await supabase
-      .from("group_invites")
-      .select("groups(name, profiles!groups_owner_id_fkey(name, handle))")
-      .eq("code", code)
-      .single();
+    const { data, error } = await supabase.rpc("get_invite_details", {
+      invite_code: code,
+    });
 
-    if (error || !data) throw new Error("Convite inválido ou expirado.");
+    if (error) {
+      console.error("Error fetching invite info:", error);
+      throw new Error("Convite inválido ou expirado.");
+    }
 
-    // Type assertion because of nested join
-    const group = data.groups as unknown as {
-      name: string;
-      profiles: { name: string; handle: string };
-    };
-    // Note: profiles!groups_owner_id_fkey is the explicit join for owner
+    // RPC returns an array (table), but we expect a single result since code is unique
+    const invite = Array.isArray(data) ? data[0] : data;
+
+    if (!invite) throw new Error("Convite não encontrado.");
+
     return {
-      groupName: group.name,
-      ownerName: group.profiles?.name || "Alguém",
-      ownerHandle: group.profiles?.handle || "",
+      groupName: invite.group_name,
+      ownerName: invite.owner_name || "Alguém",
+      ownerHandle: invite.owner_handle || "",
     };
   },
 
