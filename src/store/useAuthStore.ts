@@ -169,9 +169,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       .insert({
         user_id: user.id,
         name: item.name,
-        description: item.description,
-        price: item.price,
-        link: item.link,
+        description: item.description || null,
+        price: item.price ?? null,
+        link: item.link || null,
       })
       .select()
       .single();
@@ -206,9 +206,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   updateWishlistItem: async (id, data) => {
+    const updateData = {
+      ...data,
+      description:
+        data.description === undefined ? undefined : data.description || null,
+      price: data.price === undefined ? undefined : data.price ?? null,
+      link: data.link === undefined ? undefined : data.link || null,
+    };
+
     const { error } = await supabase
       .from("wishlist_items")
-      .update(data)
+      .update(updateData)
       .eq("id", id);
 
     if (error) throw error;

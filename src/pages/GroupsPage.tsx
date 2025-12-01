@@ -360,6 +360,7 @@ export const GroupsPage: React.FC = () => {
             <Input
               label="Valor Máximo (R$)"
               type="number"
+              inputMode="decimal"
               step="0.01"
               placeholder="100.00"
               icon={<DollarSign className="w-5 h-5" />}

@@ -30,7 +30,7 @@ export const Layout: React.FC = () => {
 
       <div className="flex-1 flex flex-col min-w-0 transition-all duration-300">
         {/* Mobile Header */}
-        <header className="md:hidden h-16 bg-christmas-wine border-b border-white/10 flex items-center justify-between px-4 sticky top-0 z-30 shadow-md">
+        <header className="md:hidden h-16 bg-christmas-wine border-b border-white/10 flex items-center justify-between px-4 fixed top-0 left-0 right-0 z-40 shadow-md">
           <button
             onClick={() => setIsSidebarOpen(true)}
             className="p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
@@ -43,7 +43,7 @@ export const Layout: React.FC = () => {
           <div className="w-10" /> {/* Spacer for centering */}
         </header>
 
-        <main className="flex-1 p-4 md:p-8 overflow-y-auto relative">
+        <main className="flex-1 p-4 md:p-8 overflow-y-auto relative pt-20 md:pt-8">
           <div className="snow-container absolute inset-0 pointer-events-none z-0 opacity-50">
             <div className="snow"></div>
           </div>

@@ -51,9 +51,9 @@ export interface Participant {
 export interface WishlistItem {
   id: string;
   name: string;
-  description?: string;
-  price?: number;
-  link?: string;
+  description?: string | null;
+  price?: number | null;
+  link?: string | null;
 }
 
 /**

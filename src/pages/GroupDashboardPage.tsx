@@ -243,7 +243,7 @@ export const GroupDashboardPage: React.FC = () => {
   const isDrawn = currentGroup.status === "drawn";
 
   return (
-    <div className="p-4 space-y-6 pb-32">
+    <div className="p-4 space-y-6 pb-48">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center space-x-4">
           <button
@@ -398,7 +398,7 @@ export const GroupDashboardPage: React.FC = () => {
       </div>
 
       {isOwner && (
-        <div className="pt-8 border-t border-gray-100">
+        <div className="pt-8 border-t border-gray-100 mb-8">
           <Button
             variant="ghost"
             className="w-full text-red-500 hover:text-red-600 hover:bg-red-50"
@@ -409,6 +409,9 @@ export const GroupDashboardPage: React.FC = () => {
           </Button>
         </div>
       )}
+
+      {/* Explicit spacer for mobile floating button */}
+      <div className="h-24 md:hidden" />
 
       {/* Floating Action Button for Draw or View Result */}
       <div className="fixed bottom-6 left-0 right-0 md:left-72 px-4 flex justify-center z-20">

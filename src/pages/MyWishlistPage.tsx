@@ -22,7 +22,10 @@ import type { WishlistItem } from "../types";
 const wishlistSchema = z.object({
   name: z.string().min(2, "Nome do item é obrigatório"),
   description: z.string().optional(),
-  price: z.string().optional(),
+  price: z
+    .string()
+    .min(1, "O valor é obrigatório")
+    .refine((val) => !isNaN(Number(val)) && Number(val) > 0, "Valor inválido"),
   link: z.string().url("URL inválida").optional().or(z.literal("")),
 });
 
@@ -73,14 +76,14 @@ export const MyWishlistPage: React.FC = () => {
       setIsLoading(true);
       const itemData = {
         name: data.name,
-        description: data.description,
-        price: data.price ? Number(data.price) : undefined,
-        link: data.link || undefined,
+        description: data.description || null,
+        price: data.price ? Number(data.price) : null,
+        link: data.link || null,
       };
 
       // Safety timeout to prevent infinite loading
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Timeout")), 10000),
+        setTimeout(() => reject(new Error("Timeout")), 15000),
       );
 
       if (editingItem) {
@@ -282,9 +285,11 @@ export const MyWishlistPage: React.FC = () => {
               <Input
                 label="Valor Estimado (R$)"
                 type="number"
+                inputMode="decimal"
                 step="0.01"
                 placeholder="0.00"
                 icon={<DollarSign className="w-5 h-5" />}
+                error={errors.price?.message}
                 {...register("price")}
               />
 
