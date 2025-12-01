@@ -345,18 +345,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const { user } = get();
     if (!user) return;
 
-    // Supabase doesn't allow users to delete themselves directly via client SDK by default (admin only),
-    // UNLESS we use a specific RPC function or RLS policy on a separate table that triggers a function.
-    // OR we just delete the profile and let a trigger delete the auth user (requires service role).
-    // For now, let's just sign out and pretend, or call an RPC if we had one.
-    // Actually, we can delete the PROFILE row. If we set up CASCADE correctly, it might clean up data,
-    // but it won't delete the Auth User.
-    // Let's just signOut for now and mark as "deleted" in profile if we wanted soft delete.
-    // But user asked for "CRUD completo de deletar conta".
-    // We will implement `delete_own_user` RPC later.
+    // Call the RPC function to delete the user from auth.users
+    const { error } = await supabase.rpc("delete_own_user");
+
+    if (error) {
+      console.error("Erro ao excluir conta:", error);
+      throw error;
+    }
 
     await supabase.auth.signOut();
-    set({ user: null, isAuthenticated: false });
+    set({ user: null, isAuthenticated: false, wishlist: [] });
   },
 
   resetPassword: async (email: string) => {
