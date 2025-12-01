@@ -18,6 +18,7 @@ import { Input } from "../components/ui/Input";
 import { Card } from "../components/ui/Card";
 import { Modal } from "../components/ui/Modal";
 import type { WishlistItem } from "../types";
+import { useToast } from "../hooks/useToast";
 
 const wishlistSchema = z.object({
   name: z.string().min(2, "Nome do item é obrigatório"),
@@ -34,6 +35,7 @@ type WishlistForm = z.infer<typeof wishlistSchema>;
 export const MyWishlistPage: React.FC = () => {
   const { wishlist, addToWishlist, removeFromWishlist, updateWishlistItem } =
     useAuthStore();
+  const { addToast } = useToast();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [editingItem, setEditingItem] = useState<WishlistItem | null>(null);
@@ -104,14 +106,30 @@ export const MyWishlistPage: React.FC = () => {
           updateWishlistItem(editingItem.id, itemData),
           timeoutPromise,
         ]);
+        addToast({
+          type: "success",
+          title: "Sucesso!",
+          message: "Desejo atualizado com sucesso.",
+        });
       } else {
         await Promise.race([addToWishlist(itemData), timeoutPromise]);
+        addToast({
+          type: "success",
+          title: "Sucesso!",
+          message: "Desejo adicionado com sucesso.",
+        });
       }
 
       console.log("Operation successful");
       handleCloseModal();
     } catch (error) {
       console.error("Error in onSubmit:", error);
+      addToast({
+        type: "error",
+        title: "Erro",
+        message:
+          error instanceof Error ? error.message : "Erro ao salvar desejo.",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -133,10 +151,21 @@ export const MyWishlistPage: React.FC = () => {
 
         await Promise.race([removeFromWishlist(itemToDelete), timeoutPromise]);
 
+        addToast({
+          type: "success",
+          title: "Sucesso!",
+          message: "Desejo removido.",
+        });
+
         setDeleteModalOpen(false);
         setItemToDelete(null);
       } catch (error) {
         console.error("Failed to delete item:", error);
+        addToast({
+          type: "error",
+          title: "Erro",
+          message: "Erro ao remover desejo.",
+        });
       } finally {
         setIsLoading(false);
       }

@@ -83,31 +83,55 @@ export const useGroupStore = create<GroupState>((set, get) => ({
     } = await supabase.auth.getUser();
     if (!user) throw new Error("User not authenticated");
 
-    const { data, error } = await supabase
-      .from("groups")
-      .insert({
-        name: groupData.name,
-        description: groupData.description,
-        event_date: groupData.eventDate,
-        max_price: groupData.maxPrice,
-        owner_id: user.id,
-        status: "created",
-      })
-      .select()
-      .single();
+    // Safety timeout
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(
+        () => reject(new Error("Tempo limite excedido ao criar grupo.")),
+        15000,
+      ),
+    );
 
-    if (error) throw error;
+    const createOperation = async () => {
+      const { data, error } = await supabase
+        .from("groups")
+        .insert({
+          name: groupData.name,
+          description: groupData.description,
+          event_date: groupData.eventDate,
+          max_price: groupData.maxPrice,
+          owner_id: user.id,
+          status: "created",
+        })
+        .select()
+        .single();
 
-    // Add owner as admin member
-    await supabase.from("group_members").insert({
-      group_id: data.id,
-      user_id: user.id,
-      is_admin: true,
-    });
+      if (error) throw error;
 
-    // Refresh list
-    get().fetchGroups();
-    return data.id;
+      // Add owner as admin member
+      const { error: memberError } = await supabase
+        .from("group_members")
+        .insert({
+          group_id: data.id,
+          user_id: user.id,
+          is_admin: true,
+        });
+
+      if (memberError) {
+        console.error(
+          "Error adding owner to group, rolling back...",
+          memberError,
+        );
+        // Attempt to cleanup
+        await supabase.from("groups").delete().eq("id", data.id);
+        throw new Error("Falha ao registrar permissões do grupo.");
+      }
+
+      // Refresh list
+      get().fetchGroups();
+      return data.id;
+    };
+
+    return Promise.race([createOperation(), timeoutPromise]) as Promise<string>;
   },
 
   getGroup: async (id) => {

@@ -203,6 +203,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   removeFromWishlist: async (id) => {
+    // Verify session
+    const { data: sessionData, error: sessionError } =
+      await supabase.auth.getSession();
+    if (sessionError || !sessionData.session) {
+      throw new Error("Sessão expirada. Por favor, faça login novamente.");
+    }
+
     const { error } = await supabase
       .from("wishlist_items")
       .delete()
@@ -216,6 +223,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   updateWishlistItem: async (id, data) => {
+    // Verify session
+    const { data: sessionData, error: sessionError } =
+      await supabase.auth.getSession();
+    if (sessionError || !sessionData.session) {
+      throw new Error("Sessão expirada. Por favor, faça login novamente.");
+    }
+
     const updateData = {
       ...data,
       description:

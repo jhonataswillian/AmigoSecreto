@@ -13,6 +13,15 @@ drop policy if exists "Owners can delete groups" on groups;
 drop policy if exists "Owners can add members" on group_members;
 drop policy if exists "Owners can remove members" on group_members;
 
+-- Legacy policies from migration.sql (Cleanup)
+drop policy if exists "Groups are viewable by members and owner." on groups;
+drop policy if exists "Users can create groups." on groups;
+drop policy if exists "Owners can update their groups." on groups;
+drop policy if exists "Owners can delete their groups." on groups;
+drop policy if exists "Members can view other members in the same group." on group_members;
+drop policy if exists "Admins can add members." on group_members;
+drop policy if exists "Admins can remove members." on group_members;
+
 -- 2. Recreate the helper function to ensure it exists and is correct
 create or replace function public.is_member_of(_group_id uuid)
 returns boolean
