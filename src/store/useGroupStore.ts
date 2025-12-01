@@ -10,6 +10,10 @@ interface GroupState {
   createGroup: (
     group: Omit<Group, "id" | "participants" | "status">,
   ) => Promise<string>;
+  updateGroup: (
+    groupId: string,
+    data: Partial<Omit<Group, "id" | "participants" | "status" | "ownerId">>,
+  ) => Promise<void>;
   getGroup: (id: string) => Promise<void>;
   inviteUser: (groupId: string, identifier: string) => Promise<void>;
   addParticipant: (
@@ -92,12 +96,17 @@ export const useGroupStore = create<GroupState>((set, get) => ({
     );
 
     const createOperation = async () => {
+      // Ensure date is saved as UTC Noon to avoid timezone shifts
+      const formattedDate = groupData.eventDate
+        ? `${groupData.eventDate.split("T")[0]}T12:00:00Z`
+        : null;
+
       const { data, error } = await supabase
         .from("groups")
         .insert({
           name: groupData.name,
           description: groupData.description,
-          event_date: groupData.eventDate,
+          event_date: formattedDate,
           max_price: groupData.maxPrice,
           owner_id: user.id,
           status: "created",
@@ -132,6 +141,35 @@ export const useGroupStore = create<GroupState>((set, get) => ({
     };
 
     return Promise.race([createOperation(), timeoutPromise]) as Promise<string>;
+  },
+
+  updateGroup: async (
+    groupId: string,
+    data: Partial<Omit<Group, "id" | "participants" | "status" | "ownerId">>,
+  ) => {
+    const updateData: Record<string, any> = {};
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.description !== undefined)
+      updateData.description = data.description;
+
+    // Ensure date is saved as UTC Noon to avoid timezone shifts
+    if (data.eventDate !== undefined) {
+      updateData.event_date = data.eventDate
+        ? `${data.eventDate.split("T")[0]}T12:00:00Z`
+        : null;
+    }
+
+    if (data.maxPrice !== undefined) updateData.max_price = data.maxPrice;
+
+    const { error } = await supabase
+      .from("groups")
+      .update(updateData)
+      .eq("id", groupId);
+
+    if (error) throw error;
+
+    // Refresh group details
+    get().getGroup(groupId);
   },
 
   getGroup: async (id) => {

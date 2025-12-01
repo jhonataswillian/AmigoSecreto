@@ -8,8 +8,9 @@ import {
   ArrowLeft,
   Trash2,
   AlertTriangle,
-  LogOut, // Added LogOut import
-  Crown, // Added Crown
+  LogOut,
+  Crown,
+  Edit2,
 } from "lucide-react";
 import { useGroupStore } from "../store/useGroupStore";
 import type { Participant, WishlistItem } from "../types";
@@ -42,6 +43,7 @@ export const GroupDashboardPage: React.FC = () => {
     deleteGroup,
     leaveGroup,
     transferOwnership,
+    updateGroup,
   } = useGroupStore();
   const user = useAuthStore((state) => state.user);
 
@@ -67,6 +69,71 @@ export const GroupDashboardPage: React.FC = () => {
   const [isTransferModalOpen, setIsTransferModalOpen] = React.useState(false);
   const [selectedNewAdmin, setSelectedNewAdmin] =
     React.useState<Participant | null>(null);
+
+  // Edit Group State
+  const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
+  const [editForm, setEditForm] = React.useState({
+    name: "",
+    description: "",
+    eventDate: "",
+    maxPrice: "",
+  });
+
+  // Helper to parse date string safely to local date (noon to avoid TZ issues)
+  const parseDateToLocal = (dateString: string | null | undefined) => {
+    if (!dateString) return null;
+    try {
+      // Handle both YYYY-MM-DD and ISO strings
+      const cleanDate = dateString.split("T")[0]; // Get just the date part
+      const [year, month, day] = cleanDate.split("-").map(Number);
+
+      if (!year || !month || !day) return null;
+
+      // Create date at noon to be safe from midnight timezone shifts
+      return new Date(year, month - 1, day, 12, 0, 0);
+    } catch {
+      return null;
+    }
+  };
+
+  React.useEffect(() => {
+    if (currentGroup) {
+      setEditForm({
+        name: currentGroup.name,
+        description: currentGroup.description || "",
+        // Ensure we only put YYYY-MM-DD in the input
+        eventDate: currentGroup.eventDate
+          ? currentGroup.eventDate.split("T")[0]
+          : "",
+        maxPrice: currentGroup.maxPrice.toString(),
+      });
+    }
+  }, [currentGroup]);
+
+  const handleUpdateGroup = async () => {
+    if (!id) return;
+    try {
+      await updateGroup(id, {
+        name: editForm.name,
+        description: editForm.description,
+        eventDate: editForm.eventDate,
+        maxPrice: Number(editForm.maxPrice),
+      });
+      addToast({
+        type: "success",
+        title: "Grupo Atualizado",
+        message: "As informações do grupo foram atualizadas.",
+      });
+      setIsEditModalOpen(false);
+    } catch (error) {
+      console.error(error);
+      addToast({
+        type: "error",
+        title: "Erro",
+        message: "Erro ao atualizar grupo.",
+      });
+    }
+  };
 
   const handleRedraw = async () => {
     if (!id) return;
@@ -266,6 +333,15 @@ export const GroupDashboardPage: React.FC = () => {
           <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
             <Button
               variant="outline"
+              onClick={() => setIsEditModalOpen(true)}
+              size="sm"
+              className="w-full sm:w-auto justify-center"
+            >
+              <Edit2 className="w-4 h-4 mr-2" />
+              Editar
+            </Button>
+            <Button
+              variant="outline"
               onClick={() => setIsInviteModalOpen(true)}
               size="sm"
               className="w-full sm:w-auto justify-center"
@@ -312,9 +388,9 @@ export const GroupDashboardPage: React.FC = () => {
           <span className="text-sm font-medium">
             <span className="text-sm font-medium">
               {(() => {
-                if (!currentGroup.eventDate) return "Data a definir";
-                const date = new Date(currentGroup.eventDate);
-                if (isNaN(date.getTime())) return "Data Inválida";
+                const date = parseDateToLocal(currentGroup.eventDate);
+                if (!date || isNaN(date.getTime())) return "Data a definir";
+
                 return format(date, "dd 'de' MMMM", {
                   locale: ptBR,
                 });
@@ -476,6 +552,52 @@ export const GroupDashboardPage: React.FC = () => {
         groupId={currentGroup.id}
         onInvite={handleInvite}
       />
+
+      {/* Edit Group Modal */}
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        title="Editar Grupo"
+      >
+        <div className="space-y-4">
+          <Input
+            label="Nome do Grupo"
+            value={editForm.name}
+            onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+          />
+          <Input
+            label="Descrição"
+            value={editForm.description}
+            onChange={(e) =>
+              setEditForm({ ...editForm, description: e.target.value })
+            }
+          />
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              label="Data do Evento"
+              type="date"
+              value={editForm.eventDate}
+              onChange={(e) =>
+                setEditForm({ ...editForm, eventDate: e.target.value })
+              }
+            />
+            <Input
+              label="Valor Máximo (R$)"
+              type="number"
+              value={editForm.maxPrice}
+              onChange={(e) =>
+                setEditForm({ ...editForm, maxPrice: e.target.value })
+              }
+            />
+          </div>
+          <div className="flex justify-end gap-3 pt-2">
+            <Button variant="ghost" onClick={() => setIsEditModalOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleUpdateGroup}>Salvar Alterações</Button>
+          </div>
+        </div>
+      </Modal>
 
       {/* Delete Confirmation Modal */}
       <Modal

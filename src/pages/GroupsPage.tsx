@@ -12,6 +12,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { DollarSign } from "lucide-react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 const createGroupSchema = z.object({
   name: z.string().min(3, "Nome do grupo é obrigatório"),
@@ -165,10 +167,21 @@ export const GroupsPage: React.FC = () => {
               </div>
               <span className="font-medium">
                 {(() => {
-                  const date = new Date(group.eventDate);
-                  return isNaN(date.getTime())
-                    ? "Data Inválida"
-                    : date.toLocaleDateString();
+                  try {
+                    // Handle both YYYY-MM-DD and ISO strings
+                    const cleanDate = group.eventDate.split("T")[0];
+                    const [year, month, day] = cleanDate.split("-").map(Number);
+                    // Create date at noon to avoid TZ shifts
+                    const date = new Date(year, month - 1, day, 12, 0, 0);
+
+                    if (isNaN(date.getTime())) return "Data Inválida";
+
+                    return format(date, "dd/MM/yyyy", {
+                      locale: ptBR,
+                    });
+                  } catch {
+                    return "Data Inválida";
+                  }
                 })()}
               </span>
             </div>
