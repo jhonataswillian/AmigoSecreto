@@ -280,7 +280,7 @@ export const ProfilePage: React.FC = () => {
                   <FrameRenderer frame={selectedFrame} />
                   <button
                     onClick={() => setIsEditorOpen(true)}
-                    className="absolute bottom-0 right-0 p-2.5 bg-christmas-wine text-white rounded-full shadow-lg hover:bg-christmas-wine-light hover:scale-110 transition-all border-4 border-white"
+                    className="absolute -bottom-2 -right-2 p-2.5 bg-christmas-wine text-white rounded-full shadow-lg hover:bg-christmas-wine-light hover:scale-110 transition-all border-4 border-white z-20"
                   >
                     <Edit2 className="w-4 h-4" />
                   </button>
